@@ -7259,10 +7259,8 @@ function tphSyncFile(){
       tphParseExcel(e.target.result)
         .then(function(products){
           if(!products||products.length===0) throw new Error('Kh\u00f4ng \u0111\u1ecdc \u0111\u01b0\u1ee3c d\u1eef li\u1ec7u');
-          var existing=tphLoad();
-          existing.products=products;
-          tphSaveData(existing);
-          tphRender();
+          tphMainSave(products);
+          tphMainRender();
           btn.innerHTML='\u2705 Xong! ('+products.length+' SP)';
           btn.disabled=false;
           setTimeout(function(){btn.innerHTML=origHtml;btn.disabled=false;},3000);
