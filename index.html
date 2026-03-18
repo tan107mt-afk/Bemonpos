@@ -3165,8 +3165,6 @@ function loginSuccess(account, fromSession){
   if(sb) sb.classList.add('visible');
   // Update topnav branch badge
   // Update logo text to account name
-  const navLogoName = document.getElementById('nav-logo-name');
-  // nav-logo stays as 'Zentea QLCH' — branch shown in right pill only
 
   // Account dropdown in topnav
   const navBadge = document.getElementById('nav-branch-badge');
@@ -3213,7 +3211,6 @@ function doLogout(){
   const navBadge = document.getElementById('nav-branch-badge');
   if(navBadge) navBadge.innerHTML = '';
   const navLogo = document.getElementById('nav-logo-name');
-  if(navLogo) navLogo.textContent = 'Zentea QLCH';
   // Show login screen
   document.getElementById('home').style.display = 'flex';
   document.querySelector('.stats-bar').style.display = 'none';
