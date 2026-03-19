@@ -1519,7 +1519,18 @@ footer strong{color:var(--green-light);}
       </div>
     </div>
     <div class="acc-inner" style="padding:0;">
-      <div id="tph-compare-panel" style="padding:0 0 10px 0;"></div>
+      <!-- ── TPH COMPARE BAR ── -->
+      <div style="padding:10px 16px 10px;background:#fff5f5;border-bottom:1.5px solid #fecaca;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:700;color:#b91c1c;white-space:nowrap;">📊 So sánh %</span>
+          <select id="tph-cmp-sel" onchange="wmUpdateCompare('tph')"
+            style="padding:5px 10px;border-radius:8px;border:1.5px solid #fecaca;font-size:12px;
+            font-family:'Open Sans',sans-serif;background:#fff;color:#1a1a1a;outline:none;cursor:pointer;max-width:220px;">
+            <option value="">-- Chọn thành phẩm --</option>
+          </select>
+          <div id="tph-cmp-bars" style="flex:1;min-width:240px;height:48px;display:flex;align-items:flex-end;"></div>
+        </div>
+      </div>
       <div style="overflow-x:auto;overflow-y:auto;width:100%;max-height:400px;">
         <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'Open Sans',sans-serif;min-width:1100px;">
           <thead>
@@ -7162,7 +7173,16 @@ function tphMainRender(){
   }
 
   // ── Compare row (thead) ──
-  wmRenderCompare('tph', data);
+  // Populate tph-cmp-sel
+  var tphSel = document.getElementById('tph-cmp-sel');
+  if(tphSel){
+    var curVal = tphSel.value;
+    var opts = '<option value="">-- Chọn thành phẩm --</option>';
+    data.forEach(function(r,i){ opts += '<option value="'+i+'">'+(r.name||'')+'</option>'; });
+    tphSel.innerHTML = opts;
+    if(curVal && data[parseInt(curVal)]) tphSel.value = curVal;
+    if(tphSel.value) wmUpdateCompare('tph');
+  }
 }
 
 
