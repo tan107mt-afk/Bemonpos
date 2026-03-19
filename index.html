@@ -7140,14 +7140,7 @@ function tphMainRender(){
   var tfoot = document.getElementById('tph-main-tfoot');
   if(!tbody) return;
 
-  var sortDir = window._tphSortDir || 0;
-  var displayData = data.slice();
-  if(sortDir === 1) displayData.sort(function(a,b){ return wmRowSum(a)-wmRowSum(b); });
-  if(sortDir === 2) displayData.sort(function(a,b){ return wmRowSum(b)-wmRowSum(a); });
-
-  var tdBase = 'padding:7px 8px;font-size:12px;border-bottom:1px solid #fee2e2;';
-
-  // Populate select ALWAYS (before early return)
+  // ── Luôn populate select trước (kể cả data rỗng) ──
   var tphSelEl = document.getElementById('tph-cmp-sel');
   if(tphSelEl){
     var _cv = tphSelEl.value;
@@ -7158,21 +7151,30 @@ function tphMainRender(){
     if(tphSelEl.value) wmUpdateCompare('tph');
   }
 
+  // ── Xử lý data rỗng ──
   if(data.length === 0){
     tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:32px;color:#bbb;font-size:13px;">Chưa có dữ liệu — nhấn <strong>☁ Nhập file Excel</strong> để tải lên</td></tr>';
     if(tfoot) tfoot.innerHTML = '';
     return;
   }
 
+  // ── Sort ──
+  var sortDir = window._tphSortDir || 0;
+  var displayData = data.slice();
+  if(sortDir === 1) displayData.sort(function(a,b){ return wmRowSum(a)-wmRowSum(b); });
+  if(sortDir === 2) displayData.sort(function(a,b){ return wmRowSum(b)-wmRowSum(a); });
+
+  var tdBase = 'padding:7px 8px;font-size:12px;border-bottom:1px solid #fee2e2;';
   var totals = [0,0,0,0,0,0,0,0,0,0,0,0];
 
+  // ── Render rows ──
   tbody.innerHTML = displayData.map(function(row, ri){
     var bg = ri%2===0 ? '#fff' : '#fff8f8';
     var origIdx = data.indexOf(row);
     var cells = '<td contenteditable="true" style="'+tdBase+'background:'+bg+';font-weight:600;min-width:200px;position:sticky;left:0;z-index:1;" onblur="tphMainUpdateName('+origIdx+',this.innerText)">'+row.name+'</td>';
     for(var m=0; m<12; m++){
       var v = row.months[m]||0;
-      if(v>0) totals[m] += v;
+      if(v>0) totals[m]+=v;
       cells += '<td contenteditable="true" style="'+tdBase+'background:'+bg+';text-align:center;'+(v>0?'color:#1a1a1a;':'color:#ddd;')+'" onblur="tphMainUpdateCell('+origIdx+','+m+',this.innerText)">'+(v>0?v.toLocaleString('vi-VN'):'–')+'</td>';
     }
     cells += '<td style="'+tdBase+'background:'+bg+';text-align:center;color:#888;font-size:11px;">'+(row.unit||'Ly')+'</td>';
@@ -7190,8 +7192,6 @@ function tphMainRender(){
     fc += '<td style="background:#fee2e2;border-top:2px solid #fca5a5;"></td><td style="background:#fee2e2;border-top:2px solid #fca5a5;"></td>';
     tfoot.innerHTML = '<tr>'+fc+'</tr>';
   }
-
-  // ── Compare row (thead) ──
 }
 
 
