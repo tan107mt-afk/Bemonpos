@@ -1519,7 +1519,15 @@ footer strong{color:var(--green-light);}
       </div>
     </div>
     <div class="acc-inner" style="padding:0;">
-      <div id="tph-compare-panel" style="padding:0 0 10px 0;"></div>
+      <div id="tph-compare-panel" style="padding:0 0 10px 0;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:#fff5f5;border:1.5px solid #fecaca;border-radius:12px;">
+        <span style="font-size:13px;font-weight:700;color:#b91c1c;white-space:nowrap;">📊 So sánh %</span>
+        <select id="tph-cmp-sel" onchange="wmUpdateCompare('tph')" style="padding:5px 10px;border-radius:8px;border:1.5px solid #fecaca;font-size:12px;font-family:'Open Sans',sans-serif;background:#fff;color:#1a1a1a;outline:none;cursor:pointer;max-width:200px;">
+          <option value="">-- Chọn thành phẩm --</option>
+        </select>
+        <div id="tph-cmp-bars" style="flex:1;min-width:240px;"></div>
+      </div>
+    </div>
       <div style="overflow-x:auto;overflow-y:auto;width:100%;max-height:400px;">
         <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'Open Sans',sans-serif;min-width:1100px;">
           <thead>
@@ -6394,18 +6402,37 @@ function wmToggleSort(prefix){
 }
 
 function wmRenderCompare(prefix, data){
+  var sel   = document.getElementById(prefix+'-cmp-sel');
   var panel = document.getElementById(prefix+'-compare-panel');
-  if(!panel) return;
-  if(data.length === 0){ panel.innerHTML='<div style="padding:8px 16px;color:#bbb;font-size:12px;">Nhập file Excel để xem so sánh %</div>'; return; }
 
-  var isWm        = (prefix==='wm');
+  // If panel has static HTML (tph), just update the select options
+  if(sel){
+    var curVal = sel.value;
+    var placeholder = '<option value="">-- Chọn '+(prefix==='wm'?'nguyên liệu':'thành phẩm')+' --</option>';
+    var opts = placeholder;
+    data.forEach(function(r,i){ opts += '<option value="'+i+'">'+(r.name||'')+'</option>'; });
+    sel.innerHTML = opts;
+    if(curVal && data[parseInt(curVal)]) sel.value = curVal;
+    // Re-render bars if selection active
+    if(sel.value) wmUpdateCompare(prefix);
+    else { var b=document.getElementById(prefix+'-cmp-bars'); if(b) b.innerHTML=''; }
+    return;
+  }
+
+  // WM: build full panel HTML if not already there
+  if(!panel) return;
+  var isWm = (prefix==='wm');
   var accentColor = isWm ? 'var(--green)' : '#b91c1c';
   var bgColor     = isWm ? '#f0fdf4'      : '#fff5f5';
   var borderColor = isWm ? '#bbf7d0'      : '#fecaca';
+  var placeholder2 = '<option value="">-- Chọn '+(isWm?'nguyên liệu':'thành phẩm')+' --</option>';
+  var opts2 = placeholder2;
+  data.forEach(function(r,i){ opts2 += '<option value="'+i+'">'+(r.name||'')+'</option>'; });
 
-  var opts = '<option value="">-- Chọn '+(isWm?'nguyên liệu':'thành phẩm')+' --</option>';
-  data.forEach(function(r,i){ opts += '<option value="'+i+'">'+(r.name||'')+'</option>'; });
-
+  if(data.length === 0){
+    panel.innerHTML = '<div style="padding:8px 16px;color:#bbb;font-size:12px;">Nhập file Excel để xem so sánh %</div>';
+    return;
+  }
   panel.innerHTML =
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;'
     +'background:'+bgColor+';border:1.5px solid '+borderColor+';border-radius:12px;">'
@@ -6413,10 +6440,9 @@ function wmRenderCompare(prefix, data){
     +'<select id="'+prefix+'-cmp-sel" onchange="wmUpdateCompare(\''+prefix+'\')" '
     +'style="padding:5px 10px;border-radius:8px;border:1.5px solid '+borderColor+';font-size:12px;'
     +'font-family:\'Open Sans\',sans-serif;background:#fff;color:#1a1a1a;outline:none;cursor:pointer;max-width:200px;">'
-    +opts+'</select>'
+    +opts2+'</select>'
     +'<div id="'+prefix+'-cmp-bars" style="flex:1;min-width:240px;"></div>'
     +'</div>';
-
 }
 
 function wmUpdateCompare(prefix){
