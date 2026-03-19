@@ -7138,10 +7138,20 @@ function tphMainRender(){
 
   var tdBase = 'padding:7px 8px;font-size:12px;border-bottom:1px solid #fee2e2;';
 
+  // Populate select ALWAYS (before early return)
+  var tphSelEl = document.getElementById('tph-cmp-sel');
+  if(tphSelEl){
+    var _cv = tphSelEl.value;
+    var _o = '<option value="">-- Chọn thành phẩm --</option>';
+    data.forEach(function(r,i){ _o += '<option value="'+i+'">'+(r.name||'')+'</option>'; });
+    tphSelEl.innerHTML = _o;
+    if(_cv && data[parseInt(_cv)]) tphSelEl.value = _cv;
+    if(tphSelEl.value) wmUpdateCompare('tph');
+  }
+
   if(data.length === 0){
     tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:32px;color:#bbb;font-size:13px;">Chưa có dữ liệu — nhấn <strong>☁ Nhập file Excel</strong> để tải lên</td></tr>';
     if(tfoot) tfoot.innerHTML = '';
-    wmRenderCompare('tph', data);
     return;
   }
 
@@ -7173,16 +7183,6 @@ function tphMainRender(){
   }
 
   // ── Compare row (thead) ──
-  // Populate tph-cmp-sel
-  var tphSel = document.getElementById('tph-cmp-sel');
-  if(tphSel){
-    var curVal = tphSel.value;
-    var opts = '<option value="">-- Chọn thành phẩm --</option>';
-    data.forEach(function(r,i){ opts += '<option value="'+i+'">'+(r.name||'')+'</option>'; });
-    tphSel.innerHTML = opts;
-    if(curVal && data[parseInt(curVal)]) tphSel.value = curVal;
-    if(tphSel.value) wmUpdateCompare('tph');
-  }
 }
 
 
