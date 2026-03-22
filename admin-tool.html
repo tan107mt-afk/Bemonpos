@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ZEN Tea – Admin Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Open Sans',sans-serif;background:#f4f9f0;min-height:100vh;}
+.topbar{background:linear-gradient(135deg,#1e5c1e,#2d7a2d);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 16px rgba(0,0,0,.18);position:sticky;top:0;z-index:100;}
+.topbar-brand{display:flex;align-items:center;gap:10px;color:#fff;}
+.topbar-name{font-family:'Lato',sans-serif;font-size:15px;font-weight:700;}
+.topbar-logout{padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Open Sans',sans-serif;transition:.15s;}
+.topbar-logout:hover{background:rgba(230,60,60,.4);}
+.container{max-width:900px;margin:0 auto;padding:28px 20px;}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#1e5c1e,#3a9430);}
+.auth-card{background:#fff;border-radius:22px;width:100%;max-width:380px;padding:36px 34px;box-shadow:0 24px 80px rgba(0,0,0,.35);}
+.auth-icon{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#1e5c1e,#4aab3a);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:24px;box-shadow:0 6px 18px rgba(74,171,58,.35);}
+.auth-title{font-family:'Lato',sans-serif;font-size:20px;font-weight:900;color:#111;text-align:center;margin-bottom:4px;}
+.auth-sub{font-size:12px;color:#9ca3af;text-align:center;margin-bottom:26px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11.5px;font-weight:700;color:#374151;margin-bottom:6px;}
+.field input,.field select{width:100%;padding:11px 14px;border:2px solid #e5e7eb;border-radius:11px;font-family:'Open Sans',sans-serif;font-size:14px;color:#111;outline:none;transition:border-color .18s,box-shadow .18s;background:#f9fafb;}
+.field input:focus,.field select:focus{border-color:#4aab3a;background:#fff;box-shadow:0 0 0 3px rgba(74,171,58,.12);}
+.field .wrap{position:relative;}
+.field .wrap input{padding-right:44px;}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#c0c4cc;font-size:16px;}
+.eye:hover{color:#4aab3a;}
+.btn{padding:12px 22px;border:none;border-radius:11px;font-family:'Open Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;}
+.btn-primary{background:linear-gradient(135deg,#2d7a2d,#4aab3a);color:#fff;box-shadow:0 4px 14px rgba(74,171,58,.3);}
+.btn-primary:hover{background:linear-gradient(135deg,#1e5c1e,#3d9630);transform:translateY(-1px);}
+.btn-danger{background:#fff1f0;color:#dc2626;border:1.5px solid #fca5a5;}
+.btn-danger:hover{background:#fef2f2;}
+.btn-ghost{background:#f4f9f0;color:#2d7a2d;border:1.5px solid #d8ebd0;}
+.btn-ghost:hover{background:#e8f5e2;}
+.btn-full{width:100%;}
+.btn-sm{padding:7px 14px;font-size:12.5px;border-radius:8px;}
+.err{display:none;background:#fff1f0;border:1.5px solid #fca5a5;border-radius:10px;padding:9px 14px;font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:14px;text-align:center;}
+.ok{display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:9px 14px;font-size:12.5px;color:#16a34a;font-weight:600;margin-bottom:14px;text-align:center;}
+.section-card{background:#fff;border-radius:18px;padding:26px;box-shadow:0 2px 14px rgba(45,122,45,.07);margin-bottom:20px;border:1px solid #e8f5e2;}
+.section-title{font-family:'Lato',sans-serif;font-size:16px;font-weight:900;color:#1a1a1a;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px;}
+.stat-card{background:#fff;border:1.5px solid #e8f5e2;border-radius:14px;padding:16px;text-align:center;box-shadow:0 1px 6px rgba(45,122,45,.06);}
+.stat-num{font-family:'Lato',sans-serif;font-size:26px;font-weight:900;color:#2d7a2d;line-height:1;}
+.stat-lbl{font-size:11px;color:#888;font-weight:600;margin-top:5px;}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-green{background:#dcfce7;color:#16a34a;}
+.badge-blue{background:#dbeafe;color:#1d4ed8;}
+.badge-red{background:#fee2e2;color:#dc2626;}
+.acc-table{width:100%;border-collapse:collapse;font-size:13px;}
+.acc-table th{padding:10px 12px;text-align:left;font-weight:700;color:#6b7280;background:#f9fafb;border-bottom:2px solid #e5e7eb;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+.acc-table td{padding:11px 12px;border-bottom:1px solid #f0f0f0;color:#374151;vertical-align:middle;}
+.acc-table tr:last-child td{border-bottom:none;}
+.acc-table tr:hover td{background:#f9fdfb;}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4aab3a,#2d7a2d);color:#fff;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+.code-display{background:#f0fdf4;border:2px dashed #86efac;border-radius:14px;padding:18px 20px;text-align:center;margin-bottom:18px;}
+.code-val{font-family:'Lato',sans-serif;font-size:28px;font-weight:900;color:#1a1a1a;letter-spacing:5px;}
+.info-box{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:14px 16px;margin-bottom:18px;}
+.info-title{font-size:12px;font-weight:700;color:#0369a1;margin-bottom:5px;}
+.info-text{font-size:12.5px;color:#555;line-height:1.6;}
+.info-text code{background:#e0f2fe;padding:1px 6px;border-radius:5px;font-size:11.5px;color:#0369a1;font-weight:700;}
+.modal-bg{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:440px;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+.modal-title{font-family:'Lato',sans-serif;font-size:17px;font-weight:900;color:#111;}
+.modal-close{background:#f3f4f6;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;color:#6b7280;}
+@media(max-width:600px){.stats-row{grid-template-columns:1fr 1fr;}.acc-table .hide-sm{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="auth-gate" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-icon">🔐</div>
+    <p class="auth-title">ZEN Tea Admin</p>
+    <p class="auth-sub">Quản trị hệ thống tài khoản</p>
+    <div class="field"><label>Email quản trị</label><input id="a-user" type="email" placeholder="admin@zentea.vn" onkeydown="if(event.key==='Enter')document.getElementById('a-pw').focus()"/></div>
+    <div class="field"><label>Mật khẩu</label><div class="wrap"><input id="a-pw" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')adminLogin()"/><button class="eye" onclick="toggleEye('a-pw',this)">👁</button></div></div>
+    <div id="a-err" class="err"></div>
+    <button class="btn btn-primary btn-full" onclick="adminLogin()">Đăng nhập →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span style="font-size:20px;">🍃</span>
+      <span class="topbar-name">ZEN Tea — Admin</span>
+    </div>
+    <button class="topbar-logout" onclick="adminLogout()">Đăng xuất</button>
+  </div>
+
+  <div class="container">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Tổng tài khoản</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-staff">0</div><div class="stat-lbl">Nhân viên</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-manager" style="font-size:20px;">0</div><div class="stat-lbl">Quản lý</div></div>
+    </div>
+
+
+        <!-- Account list -->
+    <div class="section-card">
+      <div class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <span>👥 Danh sách tài khoản</span>
+        <button class="btn btn-primary btn-sm" onclick="openCreateModal()">＋ Tạo tài khoản</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="acc-table">
+          <thead><tr>
+            <th>Nhân viên</th><th>Tên đăng nhập</th>
+            <th class="hide-sm">Vai trò</th><th class="hide-sm">Ngày tạo</th>
+            <th style="text-align:center;">Thao tác</th>
+          </tr></thead>
+          <tbody id="acc-tbody"><tr><td colspan="5" style="text-align:center;padding:28px;color:#bbb;">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Link -->
+    <div class="section-card" style="background:#f0f9ff;border-color:#bae6fd;">
+      <div class="section-title" style="color:#0369a1;margin-bottom:12px;">🌐 Link trang QLCH nhân viên</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <code id="main-link" style="flex:1;background:#e0f2fe;padding:10px 16px;border-radius:10px;font-size:13px;color:#0369a1;font-weight:700;word-break:break-all;">
+          https://tan107mt-afk.github.io/zentea-qlch/
+        </code>
+        <button class="btn btn-ghost btn-sm" onclick="copyLink()">📋 Copy</button>
+        <a href="https://tan107mt-afk.github.io/zentea-qlch/" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none;">🔗 Mở</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CREATE / EDIT MODAL -->
+<div class="modal-bg" id="create-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Tạo tài khoản</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <input type="hidden" id="edit-id"/>
+    <div class="field"><label>Họ và tên *</label><input id="m-fullname" type="text" placeholder="Nguyễn Văn A"/></div>
+    <div class="field"><label>Tên đăng nhập *</label><input id="m-username" type="text" placeholder="nguyenvana"/></div>
+    <div class="field"><label>Mật khẩu *</label><div class="wrap"><input id="m-pass" type="password" placeholder="Ít nhất 4 ký tự"/><button class="eye" onclick="toggleEye('m-pass',this)">👁</button></div></div>
+    <div class="field"><label>Vai trò</label>
+      <select id="m-role">
+        <option value="staff">Nhân viên</option>
+        <option value="manager">Quản lý ca</option>
+        <option value="admin_store">Quản lý cửa hàng</option>
+      </select>
+    </div>
+    <div id="m-err" class="err"></div>
+    <div id="m-ok"  class="ok"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="saveAccount()">💾 Lưu</button>
+      <button id="m-del-btn" class="btn btn-danger" onclick="deleteAccount()" style="display:none;">🗑 Xóa</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_USER='qlch@tominh.vn', ADMIN_PASS='Zentea11';
+const ACCOUNTS_KEY='zentea-accounts', REG_KEY='zentea-reg-code';
+const SH=true;
+
+async function dbGet(k){
+  if(window.storage){try{const r=await window.storage.get(k,SH);if(r&&r.value)return r.value;}catch(e){}}
+  try{return localStorage.getItem(k)||null;}catch(e){return null;}
+}
+async function dbSet(k,v){
+  if(window.storage){try{await window.storage.set(k,v,SH);}catch(e){}}
+  try{localStorage.setItem(k,v);}catch(e){}
+}
+async function dbDel(k){
+  if(window.storage){try{await window.storage.delete(k,SH);}catch(e){}}
+  try{localStorage.removeItem(k);}catch(e){}
+}
+async function getAccs(){try{const r=await dbGet(ACCOUNTS_KEY);return r?JSON.parse(r):[];}catch(e){return[];}}
+async function setAccs(list){await dbSet(ACCOUNTS_KEY,JSON.stringify(list));}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toggleEye(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
+
+// ── AUTH ──
+function adminLogin(){
+  const u=document.getElementById('a-user').value.trim();
+  const p=document.getElementById('a-pw').value;
+  const err=document.getElementById('a-err');
+  err.style.display='none';
+  if(u!==ADMIN_USER||p!==ADMIN_PASS){
+    err.textContent='Tài khoản hoặc mật khẩu không đúng';
+    err.style.display='block';
+    document.getElementById('a-pw').value='';
+    return;
+  }
+  sessionStorage.setItem('zt-admin','1');
+  document.getElementById('auth-gate').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  loadAll();
+}
+function adminLogout(){
+  sessionStorage.removeItem('zt-admin');
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('auth-gate').style.display='flex';
+  document.getElementById('a-user').value='';
+  document.getElementById('a-pw').value='';
+}
+
+// ── LOAD ──
+async function loadAll(){ await loadAccounts(); }
+
+
+
+// ── ACCOUNTS ──
+async function loadAccounts(){
+  const list=await getAccs();
+  const tbody=document.getElementById('acc-tbody');
+  document.getElementById('stat-total').textContent=list.length;
+  document.getElementById('stat-staff').textContent=list.filter(a=>a.role==='staff').length;
+  document.getElementById('stat-manager').textContent=list.filter(a=>a.role!=='staff').length;
+  if(!list.length){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:#bbb;font-size:13px;">Chưa có tài khoản. Tạo tài khoản đầu tiên!</td></tr>';
+    return;
+  }
+  const roleLabel=r=>r==='manager'?'Quản lý ca':r==='admin_store'?'Quản lý CH':'Nhân viên';
+  const roleCls=r=>r==='admin_store'?'badge-red':r==='manager'?'badge-blue':'badge-green';
+  tbody.innerHTML=list.map(a=>{
+    const init=(a.fullname||a.username||'?')[0].toUpperCase();
+    const dt=a.createdAt?new Date(a.createdAt).toLocaleDateString('vi-VN'):'–';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar">${init}</div><span style="font-weight:700;">${esc(a.fullname||a.username)}</span></div></td>
+      <td><code style="background:#f3f4f6;padding:2px 8px;border-radius:6px;font-size:12px;">${esc(a.username)}</code></td>
+      <td class="hide-sm"><span class="badge ${roleCls(a.role||'staff')}">${roleLabel(a.role||'staff')}</span></td>
+      <td class="hide-sm" style="color:#9ca3af;font-size:12px;">${dt}</td>
+      <td style="text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openEditModal('${esc(a.id)}')">✏️ Sửa</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── MODAL ──
+function openCreateModal(){
+  document.getElementById('modal-title').textContent='＋ Tạo tài khoản mới';
+  document.getElementById('edit-id').value='';
+  ['m-fullname','m-username','m-pass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('m-role').value='staff';
+  document.getElementById('m-del-btn').style.display='none';
+  clearMMsg();
+  document.getElementById('create-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('m-fullname').focus(),100);
+}
+async function openEditModal(id){
+  const list=await getAccs();
+  const acc=list.find(a=>a.id===id);
+  if(!acc)return;
+  document.getElementById('modal-title').textContent='✏️ Chỉnh sửa tài khoản';
+  document.getElementById('edit-id').value=acc.id;
+  document.getElementById('m-fullname').value=acc.fullname||'';
+  document.getElementById('m-username').value=acc.username;
+  document.getElementById('m-pass').value=acc.password;
+  document.getElementById('m-role').value=acc.role||'staff';
+  document.getElementById('m-del-btn').style.display='block';
+  clearMMsg();
+  document.getElementById('create-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('create-modal').classList.remove('open');}
+function clearMMsg(){['m-err','m-ok'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});}
+function mErr(msg){clearMMsg();const e=document.getElementById('m-err');e.textContent=msg;e.style.display='block';}
+function mOk(msg) {clearMMsg();const e=document.getElementById('m-ok'); e.textContent=msg;e.style.display='block';}
+
+async function saveAccount(){
+  const id=document.getElementById('edit-id').value;
+  const fullname=(document.getElementById('m-fullname').value||'').trim();
+  const username=(document.getElementById('m-username').value||'').trim().toLowerCase();
+  const pass=document.getElementById('m-pass').value;
+  const role=document.getElementById('m-role').value;
+  if(!fullname){mErr('Vui lòng nhập họ tên');return;}
+  if(!username){mErr('Vui lòng nhập tên đăng nhập');return;}
+  if(!/^[a-z0-9_.]+$/.test(username)){mErr('Tên đăng nhập chỉ dùng chữ thường, số, _ và .');return;}
+  if(!pass||pass.length<4){mErr('Mật khẩu phải ít nhất 4 ký tự');return;}
+  const list=await getAccs();
+  if(list.find(a=>a.username===username&&a.id!==id)){mErr('Tên đăng nhập đã tồn tại');return;}
+  if(id){const idx=list.findIndex(a=>a.id===id);if(idx>=0)list[idx]={...list[idx],fullname,username,password:pass,role};}
+  else{list.push({id:'acc-'+Date.now(),username,fullname,password:pass,role,branch:'global',createdAt:new Date().toISOString()});}
+  await setAccs(list);
+  mOk(id?'✅ Đã cập nhật!':'✅ Tạo tài khoản thành công!');
+  await loadAccounts();
+  setTimeout(closeModal,1500);
+}
+
+async function deleteAccount(){
+  const id=document.getElementById('edit-id').value;
+  const fn=document.getElementById('m-fullname').value;
+  if(!id)return;
+  if(!confirm('Xóa tài khoản "'+fn+'"? Không thể khôi phục!'))return;
+  let list=await getAccs();
+  list=list.filter(a=>a.id!==id);
+  await setAccs(list);
+  closeModal();
+  await loadAccounts();
+}
+
+function copyLink(){
+  navigator.clipboard.writeText('https://tan107mt-afk.github.io/zentea-qlch/')
+    .then(()=>alert('✅ Đã sao chép!'))
+    .catch(()=>prompt('Link:','https://tan107mt-afk.github.io/zentea-qlch/'));
+}
+
+document.getElementById('create-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('DOMContentLoaded',()=>{
+  if(sessionStorage.getItem('zt-admin')==='1'){
+    document.getElementById('auth-gate').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    loadAll();
+  }
+  const u=document.getElementById('a-user');if(u)u.focus();
+});
+</script>
+</body>
+</html>
