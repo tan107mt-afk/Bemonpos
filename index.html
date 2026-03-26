@@ -4287,6 +4287,15 @@ function loginSuccess(account, fromSession){
     }
   } catch(e){}
 }
+  // Hiện nút duyệt nếu là superadmin
+  setTimeout(async () => {
+    if(currentUser && currentUser.role === 'superadmin'){
+      const btn = document.getElementById('approve-btn');
+      if(btn) btn.style.display = 'inline-flex';
+      await checkPendingBadge();
+    }
+  }, 800);
+}
 
 function doLogout(){
   isLoggedIn = false; currentUser = null; selectedBranch = null;
