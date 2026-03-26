@@ -661,7 +661,46 @@ button[style*="border-radius:50%"]:not(.zeye):not(.eye):not(.modal-close){
 }
 .pending-logout:hover{background:#d1d5db;}
 
-/* ── Approval Panel (for superadmin) ── */
+/* ── Role badges ── */
+.role-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.role-superadmin{background:#fef3c7;color:#92400e;}
+.role-admin{background:#dbeafe;color:#1e40af;}
+.role-staff{background:#d1fae5;color:#065f46;}
+.role-viewer{background:#f3e8ff;color:#6b21a8;}
+.role-pending{background:#fee2e2;color:#991b1b;}
+
+/* ── Member card ── */
+.member-card{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:12px;
+  background:#f8fafc;border:1.5px solid #e5e7eb;
+  margin-bottom:10px;transition:.15s;
+}
+.member-card:hover{border-color:#d1d5db;background:#f1f5f9;}
+.member-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--green-light));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#fff;font-size:15px;flex-shrink:0;
+}
+.member-avatar img{width:38px;height:38px;border-radius:50%;object-fit:cover;}
+.member-info{flex:1;min-width:0;}
+.member-name{font-size:13px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.member-email{font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.member-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.role-select-inline{
+  padding:4px 8px;border:1.5px solid #e5e7eb;border-radius:8px;
+  font-size:11px;font-family:'Open Sans',sans-serif;background:#fff;
+  cursor:pointer;outline:none;
+}
+.role-select-inline:focus{border-color:var(--green);}
+.btn-remove{
+  padding:5px 10px;background:#fee2e2;color:#991b1b;border:none;
+  border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
+}
+.btn-remove:hover{background:#fca5a5;}
+
+/* ── Approval Panel (for superadmin) ── *//* ── Approval Panel (for superadmin) ── */
 #approval-panel{
   position:fixed;inset:0;z-index:9998;
   background:rgba(0,0,0,.6);backdrop-filter:blur(6px);
@@ -9871,152 +9910,65 @@ function logoutPending(){
 }
 
 // ── Approval Panel (Superadmin only) ──
+function switchApprovalTab(tab){
+  const pendingEl = $('approval-list');
+  const membersEl = $('members-list');
+  const pendingBtn = $('tab-pending');
+  const membersBtn = $('tab-members');
+  if(tab === 'pending'){
+    if(pendingEl) pendingEl.style.display = 'block';
+    if(membersEl) membersEl.style.display = 'none';
+    if(pendingBtn){ pendingBtn.style.color='var(--green)'; pendingBtn.style.borderBottom='3px solid var(--green)'; }
+    if(membersBtn){ membersBtn.style.color='#6b7280'; membersBtn.style.borderBottom='3px solid transparent'; }
+  } else {
+    if(pendingEl) pendingEl.style.display = 'none';
+    if(membersEl) membersEl.style.display = 'block';
+    if(membersBtn){ membersBtn.style.color='var(--green)'; membersBtn.style.borderBottom='3px solid var(--green)'; }
+    if(pendingBtn){ pendingBtn.style.color='#6b7280'; pendingBtn.style.borderBottom='3px solid transparent'; }
+    renderMembersList();
+  }
+}
+
 async function openApprovalPanel(){
   show('approval-panel');
   await refreshApprovalList();
 }
 
-// Tab state
-let _approvalTab = 'pending';
-
-function switchApprovalTab(tab){
-  _approvalTab = tab;
-  const pendingBtn = $('tab-pending');
-  const membersBtn = $('tab-members');
-  const pendingList = $('approval-list');
-  const membersList = $('members-list');
-  if(tab === 'pending'){
-    pendingBtn.style.borderBottom = '3px solid var(--green)';
-    pendingBtn.style.color = 'var(--green)';
-    pendingBtn.style.fontWeight = '700';
-    membersBtn.style.borderBottom = 'none';
-    membersBtn.style.color = '#6b7280';
-    membersBtn.style.fontWeight = '600';
-    pendingList.style.display = 'block';
-    membersList.style.display = 'none';
-  } else {
-    membersBtn.style.borderBottom = '3px solid var(--green)';
-    membersBtn.style.color = 'var(--green)';
-    membersBtn.style.fontWeight = '700';
-    pendingBtn.style.borderBottom = 'none';
-    pendingBtn.style.color = '#6b7280';
-    pendingBtn.style.fontWeight = '600';
-    pendingList.style.display = 'none';
-    membersList.style.display = 'block';
-  }
-}
-
 const ROLE_LABELS = {
-  superadmin: {icon:'👑', label:'Super Admin', color:'#7c3aed', bg:'#ede9fe'},
-  admin:      {icon:'🛡️', label:'Quản lý',    color:'#1d4ed8', bg:'#dbeafe'},
-  staff:      {icon:'👤', label:'Nhân viên',  color:'#065f46', bg:'#d1fae5'},
-  viewer:     {icon:'👁️', label:'Xem báo cáo',color:'#92400e', bg:'#fef3c7'},
+  superadmin: {label:'Super Admin', cls:'role-superadmin'},
+  admin:      {label:'Quản lý',     cls:'role-admin'},
+  staff:      {label:'Nhân viên',   cls:'role-staff'},
+  viewer:     {label:'Xem báo cáo', cls:'role-viewer'},
+  pending:    {label:'Chờ duyệt',   cls:'role-pending'},
+  rejected:   {label:'Từ chối',     cls:'role-pending'},
 };
 
-function switchApprovalTab(tab){
-  const pendingTab = $('tab-pending'), membersTab = $('tab-members');
-  const pendingList = $('approval-list'), membersList = $('members-list');
-  if(tab === 'pending'){
-    pendingTab.style.borderBottomColor = 'var(--green)';
-    pendingTab.style.color = 'var(--green)';
-    membersTab.style.borderBottomColor = 'transparent';
-    membersTab.style.color = '#9ca3af';
-    pendingList.style.display = 'block';
-    membersList.style.display = 'none';
-  } else {
-    membersTab.style.borderBottomColor = 'var(--green)';
-    membersTab.style.color = 'var(--green)';
-    pendingTab.style.borderBottomColor = 'transparent';
-    pendingTab.style.color = '#9ca3af';
-    pendingList.style.display = 'none';
-    membersList.style.display = 'block';
-    renderMembersList();
-  }
-}
-
-const ROLE_LABELS = {superadmin:'👑 Superadmin',admin:'🛠 Quản lý',staff:'👤 Nhân viên',viewer:'👁 Xem báo cáo'};
-const ROLE_CLASS  = {superadmin:'role-superadmin',admin:'role-admin',staff:'role-staff',viewer:'role-viewer'};
-
-async function renderMembersList(){
-  const listEl = $('members-list');
-  if(!listEl) return;
-  listEl.innerHTML = '<div class="no-pending">Đang tải...</div>';
-  const accounts = await apiGetAccounts();
-  const members = accounts.filter(a => a.status === 'approved');
-  if(!members.length){ listEl.innerHTML = '<div class="no-pending">Chưa có thành viên nào</div>'; return; }
-  const html = members.map(acc => {
-    const avatarHtml = acc.avatar
-      ? `<img src="${acc.avatar}" alt="">`
-      : (acc.fullname||'?')[0].toUpperCase();
-    const roleLabel = ROLE_LABELS[acc.role] || acc.role;
-    const roleClass = ROLE_CLASS[acc.role] || 'role-staff';
-    const joined = acc.approvedAt ? new Date(acc.approvedAt).toLocaleDateString('vi-VN') : (acc.createdAt ? new Date(acc.createdAt).toLocaleDateString('vi-VN') : '');
-    const isSelf = acc.role === 'superadmin';
-    return `<div class="member-card">
-      <div class="member-avatar">${avatarHtml}</div>
-      <div class="member-info">
-        <div class="member-name">${acc.fullname || acc.username}</div>
-        <div class="member-email">${acc.email}</div>
-        <div class="member-joined">Tham gia: ${joined}</div>
-      </div>
-      <span class="member-role-badge ${roleClass}">${roleLabel}</span>
-      ${!isSelf ? `<div class="member-actions">
-        <select onchange="changeRole('${acc.id}',this.value)" class="btn-change-role" style="padding:5px 8px;">
-          <option value="staff" ${acc.role==='staff'?'selected':''}>Nhân viên</option>
-          <option value="admin" ${acc.role==='admin'?'selected':''}>Quản lý</option>
-          <option value="viewer" ${acc.role==='viewer'?'selected':''}>Xem báo cáo</option>
-        </select>
-        <button class="btn-reject" onclick="revokeAccount('${acc.id}')" title="Xóa quyền">🚫</button>
-      </div>` : ''}
-    </div>`;
-  }).join('');
-  listEl.innerHTML = html;
-  const cnt = $('tab-members-count');
-  if(cnt) cnt.textContent = members.length;
-}
-
-async function changeRole(id, newRole){
-  const accounts = await apiGetAccounts();
-  const acc = accounts.find(a => a.id === id);
-  if(!acc) return;
-  acc.role = newRole;
-  await apiSaveAccounts(accounts);
-  await renderMembersList();
-}
-
 async function refreshApprovalList(){
-  const listEl = $('approval-list');
-  if(!listEl) return;
-  listEl.innerHTML = '<div class="no-pending">Đang tải...</div>';
+  const pendingEl = $('approval-list');
+  if(!pendingEl) return;
+  pendingEl.innerHTML = '<div class="no-pending">Đang tải...</div>';
+
   const accounts = await apiGetAccounts();
   const pending = accounts.filter(a => a.status === 'pending');
-  const rejected = accounts.filter(a => a.status === 'rejected');
-
-  // Update tab counts
-  const pendingCnt = $('tab-pending-count');
-  if(pendingCnt) pendingCnt.textContent = pending.length || '';
-  const membersCnt = $('tab-members-count');
-  if(membersCnt) membersCnt.textContent = accounts.filter(a=>a.status==='approved').length || '';
 
   let html = '';
   if(pending.length > 0){
     pending.forEach(req => {
-      html += `<div class="req-card" data-id="${req.id}">
+      const initials = (req.fullname||'?').split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
+      html += `<div class="req-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">
-            ${req.avatar ? `<img src="${req.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : '👤'}
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div class="req-email" style="font-weight:700;">${req.fullname || req.email}</div>
-            <div class="req-name" style="font-size:11px;color:#6b7280;">${req.email}</div>
+          <div class="member-avatar">${req.avatar ? `<img src="${req.avatar}">` : initials}</div>
+          <div>
+            <div class="member-name">👤 ${req.fullname}</div>
+            <div class="member-email">📧 ${req.email}</div>
+            <div class="req-time" style="margin-top:2px;">Yêu cầu: ${req.requestedAt ? new Date(req.requestedAt).toLocaleString('vi-VN') : ''}</div>
           </div>
         </div>
-        <div class="req-time">⏱ ${req.requestedAt ? new Date(req.requestedAt).toLocaleString('vi-VN') : ''}</div>
         <div class="req-actions">
           <select class="req-role-sel" id="role-${req.id}">
-            <option value="staff">👤 Nhân viên</option>
-            <option value="admin">🛠 Quản lý</option>
-            <option value="viewer">👁 Xem báo cáo</option>
+            <option value="staff">Nhân viên</option>
+            <option value="admin">Quản lý</option>
+            <option value="viewer">Xem báo cáo</option>
           </select>
           <button class="btn-approve" onclick="approveAccount('${req.id}')">✅ Duyệt</button>
           <button class="btn-reject" onclick="rejectAccount('${req.id}')">❌ Từ chối</button>
@@ -10026,24 +9978,83 @@ async function refreshApprovalList(){
   } else {
     html = '<div class="no-pending">✨ Không có yêu cầu chờ duyệt</div>';
   }
+  pendingEl.innerHTML = html;
 
-  if(rejected.length > 0){
-    html += '<div style="font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:1px;margin:16px 0 10px;">🚫 ĐÃ TỪ CHỐI</div>';
-    rejected.forEach(acc => {
-      html += `<div class="req-card" style="opacity:.6;">
-        <div class="req-email">📧 ${acc.email}</div>
-        <div class="req-name">👤 ${acc.fullname}</div>
-        <div class="req-actions" style="margin-top:8px;">
-          <button class="btn-approve" onclick="approveAccount('${acc.id}')">↩️ Duyệt lại</button>
+  // Update badges
+  const badgePending = $('tab-pending-count');
+  if(badgePending) badgePending.textContent = pending.length > 0 ? pending.length : '';
+  
+
+  const navBadge = $('pending-badge');
+  if(navBadge) navBadge.textContent = pending.length > 0 ? '('+pending.length+')' : '';
+
+  // Also refresh members if that tab was open
+  const membersEl = $('tab-members');
+  if(membersEl && membersEl.style.display !== 'none') await renderMembersList();
+}
+
+async function renderMembersList(){
+  const membersEl = $('members-list');
+  if(!membersEl) return;
+  membersEl.innerHTML = '<div class="no-pending">Đang tải...</div>';
+
+  const accounts = await apiGetAccounts();
+  const members = accounts.filter(a => a.status === 'approved');
+
+  // Update badge
+  const badgeMembers = $('tab-members-count');
+  if(badgeMembers) badgeMembers.textContent = members.length;
+
+  if(!members.length){
+    membersEl.innerHTML = '<div class="no-pending">Chưa có tài khoản nào được duyệt</div>';
+    return;
+  }
+
+  // Group by role
+  const roleOrder = ['superadmin','admin','staff','viewer'];
+  const grouped = {};
+  roleOrder.forEach(r => grouped[r] = []);
+  members.forEach(m => { if(grouped[m.role]) grouped[m.role].push(m); else grouped['staff'].push(m); });
+
+  let html = '';
+  roleOrder.forEach(role => {
+    const list = grouped[role];
+    if(!list.length) return;
+    const rl = ROLE_LABELS[role] || {label:role, cls:'role-staff'};
+    html += `<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#6b7280;margin:14px 0 8px;text-transform:uppercase;">${rl.label} (${list.length})</div>`;
+    list.forEach(acc => {
+      const initials = (acc.fullname||'?').split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
+      const isSelf = acc.role === 'superadmin';
+      html += `<div class="member-card">
+        <div class="member-avatar">${acc.avatar ? `<img src="${acc.avatar}" onerror="this.parentElement.textContent='${initials}'">` : initials}</div>
+        <div class="member-info">
+          <div class="member-name">${acc.fullname || acc.username}</div>
+          <div class="member-email">${acc.email}</div>
+        </div>
+        <div class="member-actions">
+          ${isSelf ? `<span class="role-badge role-superadmin">👑 Super Admin</span>` : `
+          <select class="role-select-inline" onchange="changeRole('${acc.id}',this.value)">
+            <option value="staff"   ${acc.role==='staff'   ?'selected':''}>Nhân viên</option>
+            <option value="admin"   ${acc.role==='admin'   ?'selected':''}>Quản lý</option>
+            <option value="viewer"  ${acc.role==='viewer'  ?'selected':''}>Xem báo cáo</option>
+          </select>
+          <button class="btn-remove" onclick="revokeAccount('${acc.id}')" title="Thu hồi quyền">🚫</button>`}
         </div>
       </div>`;
     });
-  }
+  });
 
-  listEl.innerHTML = html;
-  // Update badge on nav button
-  const badge = $('pending-badge');
-  if(badge) badge.textContent = pending.length > 0 ? pending.length : '';
+  membersEl.innerHTML = html;
+}
+
+async function changeRole(id, newRole){
+  const accounts = await apiGetAccounts();
+  const acc = accounts.find(a => a.id === id);
+  if(!acc) return;
+  acc.role = newRole;
+  await apiSaveAccounts(accounts);
+  // Toast nhỏ
+  showToast('✅ Đã đổi quyền thành công');
 }
 
 async function approveAccount(id){
