@@ -4,6 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>ZENTEA – Hệ Thống Quản Lý Nội Bộ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232d7a2d'/><text x='16' y='24' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='22' fill='white'>Z</text></svg>">
+<link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232d7a2d'/><text x='16' y='24' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='22' fill='white'>Z</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232d7a2d'/><text x='16' y='24' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='22' fill='white'>Z</text></svg>">
+<meta name="theme-color" content="#2d7a2d">
+
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -966,6 +971,18 @@ button[style*="border-radius:50%"]:not(.zeye):not(.eye):not(.modal-close){
 </style>
 </head>
 <body>
+
+<!-- Loading splash - hiện khi check session -->
+<div id="app-loading" style="
+  position:fixed;inset:0;z-index:999999;
+  background:linear-gradient(135deg,#1e5c1e 0%,#2d7a2d 50%,#3a9430 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;transition:opacity .3s ease;
+">
+  <div style="font-family:'Lato',sans-serif;font-size:42px;font-weight:900;color:#fff;letter-spacing:2px;">ZENTEA</div>
+  <div style="width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;"></div>
+  <div style="font-size:13px;color:rgba(255,255,255,.7);font-weight:500;">Đang tải...</div>
+</div>
 
 <!-- SIDEBAR -->
 
@@ -4536,8 +4553,14 @@ function openRecipeDetail(id){
 function loginSuccess(account, fromSession){
   isLoggedIn = true;
   currentUser = account;
+  // Ẩn loading splash nếu còn hiển thị
+  const loader = document.getElementById('app-loading');
+  if(loader && loader.style.display !== 'none'){
+    loader.style.opacity = '0';
+    setTimeout(() => loader.style.display = 'none', 300);
+  }
   if(!fromSession){
-    try { sessionStorage.setItem('zentea-session', JSON.stringify(account)); } catch(e){}
+    try { localStorage.setItem('zentea-session', JSON.stringify(account)); } catch(e){}
   }
   // Hide hero, show main app
   hide('home');
@@ -4654,7 +4677,7 @@ function loginSuccess(account, fromSession){
 
 function doLogout(){
   isLoggedIn = false; currentUser = null; selectedBranch = null;
-  try { sessionStorage.removeItem('zentea-session'); } catch(e){}
+  try { localStorage.removeItem('zentea-session'); } catch(e){}
   // Hide sidebar
   const sb = $('sidebar');
   if(sb){ sb.classList.remove('visible','open'); }
@@ -4703,9 +4726,25 @@ function doLogout(){
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.stats-bar').style.display = 'none';
   document.querySelectorAll('.acc-section').forEach(s => s.classList.remove('page-active'));
-  show('home','flex');
-  window.scrollTo({top:0,behavior:'instant'});
-  checkSession();
+
+  // Ẩn home ngay - chỉ hiện sau khi biết có/không có session
+  hide('home');
+
+  // Check session trước khi hiện bất cứ thứ gì
+  (async () => {
+    await checkSession();
+    // Nếu không có session → hiện màn hình đăng nhập
+    if(!isLoggedIn){
+      show('home','flex');
+      window.scrollTo({top:0,behavior:'instant'});
+    }
+    // Ẩn loading splash
+    const loader = document.getElementById('app-loading');
+    if(loader){
+      loader.style.opacity = '0';
+      setTimeout(() => loader.style.display = 'none', 300);
+    }
+  })();
 });
 
 // ─── Branch-scoped storage key helper ──────────────────────────
@@ -5755,7 +5794,7 @@ async function saveAccounts(list){ return apiSaveAccounts(list); }
 
 async function checkSession(){
   try {
-    const s = sessionStorage.getItem('zentea-session');
+    const s = localStorage.getItem('zentea-session');
     if(!s) return;
     const u = JSON.parse(s);
     selectedBranch = u.branch || 'global';
@@ -5768,7 +5807,7 @@ async function checkSession(){
           u.allowedSections = fresh.allowedSections || null;
           u.role = fresh.role || u.role;
           // Cập nhật session với data mới
-          sessionStorage.setItem('zentea-session', JSON.stringify(u));
+          localStorage.setItem('zentea-session', JSON.stringify(u));
         }
       } catch(e){}
     }
