@@ -3287,21 +3287,38 @@ document.querySelectorAll('.sb-item[data-target]').forEach(item => {
   });
 });
 
-// Top navbar nav-item click handlers — SPA page switch
+// Top navbar nav-item click handlers — SPA page switch + Hash routing
 document.querySelectorAll('.nav-item[data-target]').forEach(item => {
   item.addEventListener('click', (e) => {
     e.preventDefault();
-    if(!document.body.classList.contains('logged-in')) return; // block if not logged in
+    if(!document.body.classList.contains('logged-in')) return;
     const target = item.dataset.target;
+    history.pushState(null, '', '#' + target);
     showPage(target);
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     item.classList.add('active');
   });
 });
 
+// Back/Forward browser navigation
+window.addEventListener('popstate', () => {
+  if(!document.body.classList.contains('logged-in')) return;
+  const hash = location.hash.replace('#','') || 'home';
+  showPage(hash);
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  const btn = document.querySelector('.nav-item[data-target="'+hash+'"]');
+  if(btn) btn.classList.add('active');
+});
+
 
 // SPA page navigation
 function showPage(id){
+  // Cập nhật URL hash
+  if(id && id !== 'home' && location.hash !== '#'+id){
+    history.replaceState(null, '', '#' + id);
+  } else if(id === 'home'){
+    history.replaceState(null, '', location.pathname);
+  }
   const hero = $('home');
   // Hide all pages and hero
   document.querySelectorAll('.acc-section').forEach(s => {
@@ -4614,6 +4631,17 @@ function loginSuccess(account, fromSession){
       }
     }
   } catch(e){}
+  // Sau login đọc hash URL để vào đúng section
+  setTimeout(() => {
+    const _h = location.hash.replace('#','');
+    if(_h && document.getElementById(_h)){
+      showPage(_h);
+      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+      const _b = document.querySelector('.nav-item[data-target="'+_h+'"]');
+      if(_b) _b.classList.add('active');
+    }
+  }, 400);
+
   // Hiện nút duyệt nếu là superadmin
   setTimeout(async () => {
     if(currentUser && currentUser.role === 'superadmin'){
