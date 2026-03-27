@@ -3330,6 +3330,21 @@ window.addEventListener('popstate', () => {
 
 // SPA page navigation
 function showPage(id){
+  // Kiểm tra quyền truy cập section
+  if(id && id !== 'home' && typeof currentUser !== 'undefined' && currentUser){
+    const _role = currentUser.role || 'staff';
+    const _allowed = currentUser.allowedSections;
+    if(_role !== 'superadmin' && _role !== 'admin'){
+      if(!_allowed || !Array.isArray(_allowed) || !_allowed.includes(id)){
+        // Không có quyền → chặn, về trang đầu hoặc section đầu tiên có quyền
+        const firstAllowed = _allowed && _allowed[0];
+        if(firstAllowed && firstAllowed !== id){
+          showPage(firstAllowed);
+        }
+        return;
+      }
+    }
+  }
   // Cập nhật URL hash
   if(id && id !== 'home' && location.hash !== '#'+id){
     history.replaceState(null, '', '#' + id);
@@ -5798,16 +5813,31 @@ async function checkSession(){
     if(!s) return;
     const u = JSON.parse(s);
     selectedBranch = u.branch || 'global';
-    // Luôn đọc lại allowedSections mới nhất từ DB
+    // LUÔN đọc lại từ DB để lấy status + allowedSections mới nhất
     if(u.email || u.id){
       try {
         const accounts = await apiGetAccounts();
         const fresh = accounts.find(a => a.id === u.id || a.email === u.email);
         if(fresh){
+          // Kiểm tra status - nếu bị revoke thì logout
+          if(fresh.status === 'rejected' || fresh.status === 'pending'){
+            localStorage.removeItem('zentea-session');
+            showAuthError(fresh.status === 'rejected' 
+              ? '❌ Tài khoản đã bị từ chối.' 
+              : '⏳ Tài khoản đang chờ duyệt.');
+            return;
+          }
+          // Đồng bộ mọi thay đổi từ DB
           u.allowedSections = fresh.allowedSections || null;
           u.role = fresh.role || u.role;
-          // Cập nhật session với data mới
+          u.status = fresh.status;
+          u.fullname = fresh.fullname || u.fullname;
+          // Cập nhật session
           localStorage.setItem('zentea-session', JSON.stringify(u));
+        } else if(u.googleUid) {
+          // Tài khoản Google không còn trong DB → logout
+          localStorage.removeItem('zentea-session');
+          return;
         }
       } catch(e){}
     }
@@ -10185,7 +10215,8 @@ async function handleGoogleUser(gUser, fromSession=false){
     if(found.status === 'approved'){
       loginSuccess({user:found.username,fullname:found.fullname,
         branch:found.branch||'global',role:found.role||'staff',
-        id:found.id,email:found.email,avatar:gUser.photoURL||''}, fromSession);
+        id:found.id,email:found.email,avatar:gUser.photoURL||'',
+        allowedSections:found.allowedSections||null}, fromSession);
     } else if(found.status === 'rejected'){
       showAuthError('❌ Tài khoản của bạn đã bị từ chối. Liên hệ admin.');
       if(fbAuth) fbAuth.signOut();
