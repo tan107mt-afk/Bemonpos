@@ -10627,6 +10627,145 @@ async function savePermEdit(id){
   showToast('✅ Đã cập nhật quyền', acc.fullname || acc.email);
 }
 
+
+// ══════════════════════════════════════════════════════════════
+// DOCUMENT VIEWER
+// ══════════════════════════════════════════════════════════════
+let _viewerCurrentDoc = null;
+
+function openDocViewer(id) {
+  const list = docGetList();
+  const doc = list.find(d => d.id === id);
+  if(!doc) return;
+  _viewerCurrentDoc = doc;
+
+  const modal = document.getElementById('doc-viewer-modal');
+  const body  = document.getElementById('dv-body');
+  const nameEl = document.getElementById('dv-file-name');
+  const iconEl = document.getElementById('dv-file-icon');
+  if(!modal) return;
+
+  nameEl.textContent = doc.name;
+  iconEl.textContent = docGetIcon(doc.ext);
+  modal.style.display = 'flex';
+  body.innerHTML = '<div class="dv-loading"><div class="dv-spinner"></div><span>Đang mở tài liệu...</span></div>';
+
+  setTimeout(() => {
+    switch(doc.type) {
+      case 'pdf':   viewPDF(doc, body);   break;
+      case 'word':  viewWord(doc, body);  break;
+      case 'excel': viewExcel(doc, body); break;
+      case 'ppt':   viewPPT(doc, body);   break;
+      default:      viewGeneric(doc, body);
+    }
+  }, 150);
+}
+
+function closeDocViewer() {
+  const modal = document.getElementById('doc-viewer-modal');
+  if(modal) modal.style.display = 'none';
+  _viewerCurrentDoc = null;
+}
+
+function docViewerDownload() {
+  if(_viewerCurrentDoc) docDownload(_viewerCurrentDoc.id);
+}
+
+function viewPDF(doc, body) {
+  try {
+    const blob = dataURLtoBlob(doc.data);
+    const url  = URL.createObjectURL(blob);
+    body.innerHTML = `<iframe src="${url}" style="width:100%;height:100%;border:none;flex:1;min-height:80vh;"></iframe>`;
+  } catch(e) { viewGeneric(doc, body); }
+}
+
+async function viewWord(doc, body) {
+  try {
+    if(typeof mammoth === 'undefined') throw new Error('Thư viện chưa tải');
+    const ab = await dataURLtoArrayBuffer(doc.data);
+    const result = await mammoth.convertToHtml({ arrayBuffer: ab });
+    body.innerHTML = `<div class="dv-docx-content">${result.value || '<p style="color:#999">Trống</p>'}</div>`;
+  } catch(e) {
+    body.innerHTML = `<div class="dv-loading"><span style="font-size:36px;">📝</span><b>${doc.name}</b><p style="color:#666;font-size:13px;">Không thể hiển thị trực tuyến</p><button class="dv-dl-btn" onclick="docViewerDownload()">⬇️ Tải về để xem</button></div>`;
+  }
+}
+
+async function viewExcel(doc, body) {
+  try {
+    if(typeof XLSX === 'undefined') throw new Error('Thư viện chưa tải');
+    const ab = await dataURLtoArrayBuffer(doc.data);
+    const wb = XLSX.read(ab, { type: 'array' });
+    const names = wb.SheetNames;
+
+    let html = '';
+    if(names.length > 1) {
+      html += '<div class="dv-sheet-tabs">' +
+        names.map((n,i) =>
+          `<button class="dv-sheet-tab ${i===0?'active':''}" onclick="xlsxSwitchSheet(this,'${n.replace(/'/g,"\'")}')"> ${n}</button>`
+        ).join('') + '</div>';
+    }
+    html += xlsxSheetHtml(wb, names[0]);
+    body.innerHTML = html;
+    body._wb = wb;
+  } catch(e) {
+    body.innerHTML = `<div class="dv-loading"><span style="font-size:36px;">📊</span><b>${doc.name}</b><p style="color:#666;font-size:13px;">Không thể hiển thị trực tuyến</p><button class="dv-dl-btn" onclick="docViewerDownload()">⬇️ Tải về để xem</button></div>`;
+  }
+}
+
+function xlsxSheetHtml(wb, name) {
+  const sheet = wb.Sheets[name];
+  const rows  = XLSX.utils.sheet_to_json(sheet, { header:1, defval:'' });
+  if(!rows.length) return '<div class="dv-loading">Sheet trống</div>';
+  const cols = Math.max(...rows.map(r => r.length));
+  let t = '<div class="dv-xlsx-wrap"><table class="dv-xlsx-table"><thead><tr>';
+  (rows[0]||[]).forEach(c => t += `<th>${_esc(String(c))}</th>`);
+  t += '</tr></thead><tbody>';
+  for(let i=1;i<rows.length;i++){
+    t += '<tr>';
+    for(let j=0;j<cols;j++) t += `<td>${_esc(String(rows[i][j]??''))}</td>`;
+    t += '</tr>';
+  }
+  return t + '</tbody></table></div>';
+}
+
+function xlsxSwitchSheet(btn, name) {
+  const body = document.getElementById('dv-body');
+  if(!body || !body._wb) return;
+  const wb = body._wb;
+  document.querySelectorAll('.dv-sheet-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const tabs = body.querySelector('.dv-sheet-tabs');
+  body.innerHTML = '';
+  if(tabs) body.appendChild(tabs);
+  body.insertAdjacentHTML('beforeend', xlsxSheetHtml(wb, name));
+  body._wb = wb;
+}
+
+function viewPPT(doc, body) {
+  body.innerHTML = `<div class="dv-loading" style="gap:16px;"><span style="font-size:48px;">📊</span><b style="font-size:15px;">${doc.name}</b><p style="font-size:13px;color:#666;text-align:center;max-width:320px;">PowerPoint cần ứng dụng hỗ trợ để xem.<br>Tải về rồi mở bằng PowerPoint hoặc Google Slides.</p><button class="dv-dl-btn" onclick="docViewerDownload()" style="padding:12px 28px;">⬇️ Tải về để xem</button></div>`;
+}
+
+function viewGeneric(doc, body) {
+  body.innerHTML = `<div class="dv-loading" style="gap:12px;"><span style="font-size:48px;">${docGetIcon(doc.ext)}</span><b>${doc.name}</b><button class="dv-dl-btn" onclick="docViewerDownload()">⬇️ Tải về</button></div>`;
+}
+
+function dataURLtoBlob(dataURL) {
+  const arr = dataURL.split(','), mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8 = new Uint8Array(n);
+  while(n--) u8[n] = bstr.charCodeAt(n);
+  return new Blob([u8], { type: mime });
+}
+
+async function dataURLtoArrayBuffer(dataURL) {
+  return await dataURLtoBlob(dataURL).arrayBuffer();
+}
+
+function _esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDocViewer(); });
+
 </script>
 
 <!-- Document Viewer Modal -->
