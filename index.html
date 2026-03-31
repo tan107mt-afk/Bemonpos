@@ -11400,13 +11400,16 @@ function sidebarChangeBranch(val){
     }
   }
   selectedBranch = val;
+  // Cập nhật currentUser.branch để đồng bộ
+  if(currentUser) currentUser.branch = val;
   try {
     const s = JSON.parse(localStorage.getItem('zentea-session')||'{}');
     s.branch = val;
     localStorage.setItem('zentea-session', JSON.stringify(s));
   } catch(e){}
   try { loadBranchData(); } catch(e){}
-  showToast('🏪 Đã chuyển sang: ' + (STORES[val]||val));
+  const storeName = val === 'global' ? 'Tất cả cửa hàng' : (STORES[val] || val);
+  showToast('🏪 ' + storeName);
 }
 
 function sidebarSetup(account){
@@ -11443,37 +11446,34 @@ function sidebarSetup(account){
   if(storeSel){
     const allowedSt = account.allowedStores;
     if(role === 'superadmin' || role === 'admin' || !allowedSt || allowedSt.length === 0){
-      // Admin/superadmin: thấy tất cả 17 cửa hàng
+      // Admin/superadmin: thấy tất cả 17 cửa hàng + global
       [...storeSel.options].forEach(opt => { opt.style.display = ''; });
       storeSel.value = account.branch || 'global';
-    } else {
-      // Staff: chỉ thấy cửa hàng được phân
-      let firstAllowed = null;
-      [...storeSel.options].forEach(opt => {
-        const show = opt.value === 'global' || allowedSt.includes(opt.value);
-        opt.style.display = show ? '' : 'none';
-        if(show && opt.value !== 'global' && !firstAllowed) firstAllowed = opt.value;
-      });
-      // Set giá trị: ưu tiên branch hiện tại nếu được phép, nếu không thì cửa hàng đầu tiên
-      const currentBranch = account.branch || 'global';
-      if(allowedSt.includes(currentBranch)){
-        storeSel.value = currentBranch;
-      } else if(allowedSt.length === 1){
-        storeSel.value = allowedSt[0];
-        // Tự động set branch
-        selectedBranch = allowedSt[0];
-      } else {
-        storeSel.value = firstAllowed || 'global';
-      }
-    }
-    // Ẩn dropdown nếu chỉ có 1 cửa hàng
-    if(allowedSt && allowedSt.length === 1){
+      selectedBranch = account.branch || 'global';
+    } else if(allowedSt.length === 1){
+      // Staff 1 cửa hàng: hiện tên cố định, không có dropdown
+      selectedBranch = allowedSt[0];
       if(storeWrap){
         storeWrap.innerHTML = `<div class="sb-store-label">🏪 Cửa hàng</div>
-          <div style="padding:6px 10px;background:#d1fae5;border-radius:10px;font-size:12px;font-weight:700;color:var(--green);">
-            ${STORES[allowedSt[0]] || allowedSt[0]}
+          <div style="padding:7px 12px;background:#d1fae5;border-radius:10px;font-size:12px;font-weight:700;color:var(--green);">
+            📍 ${STORES[allowedSt[0]] || allowedSt[0]}
           </div>`;
       }
+    } else {
+      // Staff nhiều cửa hàng: dropdown chỉ hiện các cửa hàng được phép
+      // Ẩn global và các cửa hàng không được phép
+      let firstAllowed = null;
+      [...storeSel.options].forEach(opt => {
+        // Staff không thấy option "Tất cả cửa hàng"
+        const show = allowedSt.includes(opt.value);
+        opt.style.display = show ? '' : 'none';
+        if(show && !firstAllowed) firstAllowed = opt.value;
+      });
+      // Set giá trị mặc định
+      const currentBranch = account.branch || '';
+      const targetBranch = allowedSt.includes(currentBranch) ? currentBranch : (firstAllowed || allowedSt[0]);
+      storeSel.value = targetBranch;
+      selectedBranch = targetBranch; // ← CẬP NHẬT selectedBranch ngay!
     }
   }
 
