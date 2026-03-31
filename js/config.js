@@ -110,5 +110,3 @@ const STORES = {
 // SUPERADMIN email
 const SUPERADMIN_EMAIL = 'tan107.mt@gmail.com';
 
-// Auth lock
-let _googleAuthLock = false;
