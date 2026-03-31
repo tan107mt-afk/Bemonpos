@@ -948,6 +948,12 @@ button[style*="border-radius:50%"]:not(.zeye):not(.eye):not(.modal-close){
 .role-viewer{background:#f3e8ff;color:#6b21a8;}
 .role-pending{background:#fee2e2;color:#991b1b;}
 
+/* ── Permission store grid ── */
+.perm-store-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:4px;
+  max-height:200px;overflow-y:auto;padding-right:4px;
+  scrollbar-width:thin;scrollbar-color:#d1fae5 transparent;
+}
 /* ── Member card ── */
 .member-card{
   display:flex;align-items:center;gap:12px;
@@ -6084,6 +6090,7 @@ async function checkSession(){
           }
           // Đồng bộ mọi thay đổi từ DB
           u.allowedSections = fresh.allowedSections || null;
+          u.allowedStores = fresh.allowedStores || null;
           u.role = fresh.role || u.role;
           u.status = fresh.status;
           u.fullname = fresh.fullname || u.fullname;
@@ -10487,7 +10494,8 @@ async function _handleGoogleUserCore(gUser, fromSession=false){
       loginSuccess({user:found.username,fullname:found.fullname,
         branch:found.branch||'global',role:found.role||'staff',
         id:found.id,email:found.email,avatar:gUser.photoURL||'',
-        allowedSections:found.allowedSections||null}, fromSession);
+        allowedSections:found.allowedSections||null,
+        allowedStores:found.allowedStores||null}, fromSession);
     } else if(found.status === 'rejected'){
       showAuthError('❌ Tài khoản của bạn đã bị từ chối. Liên hệ admin.');
       if(fbAuth) fbAuth.signOut();
@@ -10624,6 +10632,19 @@ async function refreshApprovalList(){
           &nbsp;·&nbsp;
           <span class="perm-select-all" onclick="permToggleAll('${req.id}',false)">Bỏ tất cả</span>
           <div class="perm-grid">${permBoxes}</div>
+
+          <div class="perm-title" style="margin-top:14px;">🏪 Phân quyền cửa hàng</div>
+          <span class="perm-select-all" onclick="storeToggleAll('${req.id}',true)">Chọn tất cả</span>
+          &nbsp;·&nbsp;
+          <span class="perm-select-all" onclick="storeToggleAll('${req.id}',false)">Bỏ tất cả</span>
+          <div class="perm-grid" style="grid-template-columns:1fr 1fr;">
+            ${Object.entries(STORES).filter(([id])=>id!=='global').map(([id,name])=>
+              `<label class="perm-item">
+                <input type="checkbox" class="perm-store-cb-${req.id}" value="${id}" checked>
+                <label style="font-size:11px;">${name.replace('ZEN Tea ','')}</label>
+              </label>`
+            ).join('')}
+          </div>
         </div>
       </div>`;
     });
@@ -10725,6 +10746,13 @@ async function approveAccount(id){
     acc.allowedSections = [...cbs].map(cb => cb.value);
   } else {
     acc.allowedSections = null; // admin thấy tất cả
+  }
+  // Lưu allowedStores từ checkboxes
+  if(role === 'admin' || role === 'superadmin'){
+    acc.allowedStores = null; // admin thấy tất cả stores
+  } else {
+    const storeCbs = document.querySelectorAll('.perm-store-cb-' + id + ':checked');
+    acc.allowedStores = [...storeCbs].map(cb => cb.value);
   }
   await apiSaveAccounts(accounts);
   if(fbDb) try { await fbDb.ref('pendingNotify/' + acc.googleUid).remove(); } catch(e){}
@@ -10947,6 +10975,10 @@ function permToggleAll(id, state) {
   document.querySelectorAll('.perm-cb-' + id).forEach(cb => cb.checked = state);
 }
 
+function storeToggleAll(id, state) {
+  document.querySelectorAll('.perm-store-cb-' + id).forEach(cb => cb.checked = state);
+}
+
 async function openPermEdit(id) {
   const accounts = await apiGetAccounts();
   const acc = accounts.find(a => a.id === id);
@@ -10968,34 +11000,57 @@ async function openPermEdit(id) {
     <div class="perm-grid">${makeBoxes(dt)}</div>
   `;
 
-  // Build stores checkboxes for superadmin
+  // Build stores checkboxes
   const accStores = acc.allowedStores || [];
-  const storeBoxes = STORES.filter(s=>s.id!=='global').map(s =>
-    `<label class="perm-item">
-      <input type="checkbox" class="perm-store-cb" value="${s.id}" ${(acc.role==='admin'||acc.role==='superadmin'||accStores.includes(s.id))?'checked':''}>
-      <label style="font-size:11px;">${s.name.replace('ZEN Tea ','')}</label>
-    </label>`
-  ).join('');
+  const isAdminRole = (acc.role === 'admin' || acc.role === 'superadmin');
+  const storeBoxes = Object.entries(STORES)
+    .filter(([id]) => id !== 'global')
+    .map(([id, name]) =>
+      `<label class="perm-item">
+        <input type="checkbox" class="perm-store-cb" value="${id}" ${(isAdminRole || accStores.includes(id)) ? 'checked' : ''}>
+        <label style="font-size:11px;">${name.replace('ZEN Tea ','')}</label>
+      </label>`
+    ).join('');
+  const html = `<div style="padding:20px 22px;max-height:85vh;overflow-y:auto;">
+    <!-- Header user -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1.5px solid #e5e7eb;">
+      <div style="width:42px;height:42px;border-radius:50%;overflow:hidden;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;">
+        ${acc.avatar ? '<img src="'+acc.avatar+'" style="width:100%;height:100%;object-fit:cover;">' : '👤'}
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#1a1a1a;">${acc.fullname || acc.username}</div>
+        <div style="font-size:11px;color:#9ca3af;">${acc.email}</div>
+      </div>
+    </div>
 
-  const html = `<div style="padding:20px;max-height:85vh;overflow-y:auto;">
-    <div style="font-size:14px;font-weight:700;margin-bottom:4px;">📋 Phân quyền: ${acc.fullname}</div>
-    <div style="font-size:12px;color:#9ca3af;margin-bottom:12px;">${acc.email}</div>
-    <span class="perm-select-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>c.checked=true)">Chọn tất cả menu</span>
-    &nbsp;·&nbsp;
-    <span class="perm-select-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>c.checked=false)">Bỏ tất cả</span>
-    ${permBoxes}
-    <div style="font-size:11px;font-weight:800;color:#0ea5e9;letter-spacing:1px;margin:14px 0 6px;text-transform:uppercase;">🏪 Phân Quyền Cửa Hàng</div>
-    <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;">Tick chọn cửa hàng tài khoản này được xem dữ liệu:</div>
-    <span class="perm-select-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>c.checked=true)">Chọn tất cả CH</span>
-    &nbsp;·&nbsp;
-    <span class="perm-select-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>c.checked=false)">Bỏ tất cả</span>
-    <div class="perm-grid" style="margin-top:8px;">${storeBoxes}</div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn-approve" style="flex:1;" onclick="savePermEdit('${id}')">💾 Lưu quyền</button>
-      <button class="btn-reject" onclick="closePerm()">Hủy</button>
+    <!-- Menu permissions -->
+    <div style="font-size:12px;font-weight:800;color:var(--green);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">📋 Quyền Menu</div>
+    <div style="font-size:11px;margin-bottom:8px;">
+      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>c.checked=true)">✅ Chọn tất</span>
+      &nbsp;·&nbsp;
+      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>c.checked=false)">❌ Bỏ tất</span>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#374151;margin:4px 0 3px;">🏪 Quản Lý Cửa Hàng</div>
+    <div class="perm-grid">${makeBoxes(qlch)}</div>
+    <div style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 3px;">🎓 Đào Tạo</div>
+    <div class="perm-grid">${makeBoxes(dt)}</div>
+
+    <!-- Store permissions -->
+    <div style="font-size:12px;font-weight:800;color:#6366f1;letter-spacing:.5px;text-transform:uppercase;margin:16px 0 6px;">🏪 Quyền Cửa Hàng</div>
+    <div style="font-size:11px;margin-bottom:8px;">
+      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>c.checked=true)">✅ Chọn tất</span>
+      &nbsp;·&nbsp;
+      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>c.checked=false)">❌ Bỏ tất</span>
+    </div>
+    <div class="perm-store-grid">${storeBoxes}</div>
+
+    <div style="display:flex;gap:8px;margin-top:18px;">
+      <button class="btn-approve" style="flex:1;padding:10px;" onclick="savePermEdit('${id}')">💾 Lưu quyền</button>
+      <button class="btn-reject" style="padding:10px 16px;" onclick="closePerm()">✕ Hủy</button>
     </div>
   </div>`;
 
+  
   // Show in a modal overlay
   let overlay = document.getElementById('perm-edit-overlay');
   if(!overlay){
@@ -11336,13 +11391,20 @@ function sidebarNav(target){
 }
 
 function sidebarChangeBranch(val){
+  // Kiểm tra quyền cửa hàng
+  if(currentUser && currentUser.role !== 'superadmin' && currentUser.role !== 'admin'){
+    const allowed = currentUser.allowedStores;
+    if(allowed && allowed.length > 0 && !allowed.includes(val) && val !== 'global'){
+      showToast('❌ Không có quyền truy cập cửa hàng này');
+      return;
+    }
+  }
   selectedBranch = val;
-  try { 
+  try {
     const s = JSON.parse(localStorage.getItem('zentea-session')||'{}');
     s.branch = val;
     localStorage.setItem('zentea-session', JSON.stringify(s));
   } catch(e){}
-  // Reload data for new branch
   try { loadBranchData(); } catch(e){}
   showToast('🏪 Đã chuyển sang: ' + (STORES[val]||val));
 }
@@ -11374,19 +11436,44 @@ function sidebarSetup(account){
     if(allHidden) grp.classList.add('collapsed');
   });
 
-  // Store selector: superadmin + admin thấy tất cả, staff chỉ cửa hàng mình
+  // Store selector: filter theo allowedStores
   const storeSel = document.getElementById('sb-store-sel');
   const storeWrap = document.getElementById('sb-store-wrap');
   if(storeWrap) storeWrap.style.display = '';
   if(storeSel){
-    if(role === 'staff' && account.branch && account.branch !== 'global'){
-      // Staff chỉ thấy 1 cửa hàng của mình
-      [...storeSel.options].forEach(opt => {
-        opt.style.display = (opt.value === account.branch || opt.value === 'global') ? '' : 'none';
-      });
-      storeSel.value = account.branch;
-    } else {
+    const allowedSt = account.allowedStores;
+    if(role === 'superadmin' || role === 'admin' || !allowedSt || allowedSt.length === 0){
+      // Admin/superadmin: thấy tất cả 17 cửa hàng
+      [...storeSel.options].forEach(opt => { opt.style.display = ''; });
       storeSel.value = account.branch || 'global';
+    } else {
+      // Staff: chỉ thấy cửa hàng được phân
+      let firstAllowed = null;
+      [...storeSel.options].forEach(opt => {
+        const show = opt.value === 'global' || allowedSt.includes(opt.value);
+        opt.style.display = show ? '' : 'none';
+        if(show && opt.value !== 'global' && !firstAllowed) firstAllowed = opt.value;
+      });
+      // Set giá trị: ưu tiên branch hiện tại nếu được phép, nếu không thì cửa hàng đầu tiên
+      const currentBranch = account.branch || 'global';
+      if(allowedSt.includes(currentBranch)){
+        storeSel.value = currentBranch;
+      } else if(allowedSt.length === 1){
+        storeSel.value = allowedSt[0];
+        // Tự động set branch
+        selectedBranch = allowedSt[0];
+      } else {
+        storeSel.value = firstAllowed || 'global';
+      }
+    }
+    // Ẩn dropdown nếu chỉ có 1 cửa hàng
+    if(allowedSt && allowedSt.length === 1){
+      if(storeWrap){
+        storeWrap.innerHTML = `<div class="sb-store-label">🏪 Cửa hàng</div>
+          <div style="padding:6px 10px;background:#d1fae5;border-radius:10px;font-size:12px;font-weight:700;color:var(--green);">
+            ${STORES[allowedSt[0]] || allowedSt[0]}
+          </div>`;
+      }
     }
   }
 
