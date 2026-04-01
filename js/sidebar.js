@@ -303,9 +303,11 @@ function sidebarChangeBranch(val){
     }
   }
   selectedBranch = val;
-  // Cập nhật currentUser.branch để đồng bộ
   if(currentUser) currentUser.branch = val;
-  // Visual feedback: hiện loading trên active section
+  // Sync dropdown value (trong trường hợp gọi từ code, không phải user chọn)
+  const _storeSel = document.getElementById('sb-store-sel');
+  if(_storeSel && _storeSel.value !== val) _storeSel.value = val;
+  // Visual feedback
   const _activeSection = document.querySelector('.acc-section.page-active');
   let _loadingEl = null;
   if(_activeSection){
@@ -370,53 +372,76 @@ function sidebarSetup(account){
     if(allHidden) grp.classList.add('collapsed');
   });
 
-  // Store selector: filter theo allowedStores
-  const storeSel = document.getElementById('sb-store-sel');
+  // ── Store selector: rebuild hoàn toàn mỗi lần ──
   const storeWrap = document.getElementById('sb-store-wrap');
-  if(storeWrap) storeWrap.style.display = '';
-  if(storeSel){
-    const allowedSt = account.allowedStores;
-    if(role === 'superadmin' || role === 'admin' || !allowedSt || allowedSt.length === 0){
-      // Admin/superadmin: thấy tất cả 17 cửa hàng + global
-      [...storeSel.options].forEach(opt => { opt.style.display = ''; });
-      storeSel.value = account.branch || 'global';
-      selectedBranch = account.branch || 'global';
-    } else if(allowedSt.length === 1){
-      // Staff 1 cửa hàng: hiện tên cố định, không có dropdown
-      selectedBranch = allowedSt[0];
-      if(storeWrap){
-        storeWrap.innerHTML = `<div class="sb-store-label">🏪 Cửa hàng</div>
-          <div style="padding:7px 12px;background:#d1fae5;border-radius:10px;font-size:12px;font-weight:700;color:var(--green);">
-            📍 ${STORES[allowedSt[0]] || allowedSt[0]}
-          </div>`;
+  if(!storeWrap) return;
+  storeWrap.style.display = '';
+
+  const allowedSt = account.allowedStores;
+  const isAdminRole = (role === 'superadmin' || role === 'admin');
+
+  if(isAdminRole || !allowedSt || allowedSt.length === 0){
+    // Admin/Superadmin: dropdown đầy đủ 17 cửa hàng + global
+    storeWrap.innerHTML = `
+      <label class="sb-store-label">🏪 Chi nhánh</label>
+      <select class="sb-store-sel" id="sb-store-sel" onchange="sidebarChangeBranch(this.value)">
+        <option value="global">-- Tất cả cửa hàng --</option>
+        ${Object.entries(STORES).filter(([id])=>id!=='global').map(([id,name])=>
+          `<option value="${id}">${name}</option>`
+        ).join('')}
+      </select>`;
+    const sel = document.getElementById('sb-store-sel');
+    const branch = account.branch || 'global';
+    if(sel) sel.value = branch;
+    selectedBranch = branch;
+
+  } else if(allowedSt.length === 1){
+    // Staff 1 cửa hàng: label tĩnh, không dropdown
+    selectedBranch = allowedSt[0];
+    if(currentUser) currentUser.branch = allowedSt[0];
+    storeWrap.innerHTML = `
+      <label class="sb-store-label">🏪 Chi nhánh</label>
+      <div style="padding:8px 12px;background:#d1fae5;border-radius:10px;
+        font-size:12px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="width:14px;height:14px;flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        ${STORES[allowedSt[0]]?.replace('ZEN Tea ','') || allowedSt[0]}
+      </div>`;
+    try { setTimeout(() => loadBranchData(), 100); } catch(e){}
+
+  } else {
+    // Staff nhiều cửa hàng: dropdown CHỈ hiện cửa hàng được phép
+    const currentBranch = account.branch || '';
+    const targetBranch = allowedSt.includes(currentBranch) ? currentBranch : allowedSt[0];
+    selectedBranch = targetBranch;
+    if(currentUser) currentUser.branch = targetBranch;
+
+    // Build dropdown chỉ với các cửa hàng được phép
+    const options = allowedSt.map(id => {
+      const name = (STORES[id] || id).replace('ZEN Tea ','');
+      const sel = id === targetBranch ? ' selected' : '';
+      return `<option value="${id}"${sel}>${name}</option>`;
+    }).join('');
+
+    storeWrap.innerHTML = `
+      <label class="sb-store-label">🏪 Chi nhánh (${allowedSt.length})</label>
+      <select class="sb-store-sel" id="sb-store-sel" onchange="sidebarChangeBranch(this.value)">
+        ${options}
+      </select>`;
+
+    // Sync localStorage
+    try {
+      const _sess = JSON.parse(localStorage.getItem('zentea-session')||'{}');
+      if(_sess.id === account.id){
+        _sess.branch = targetBranch;
+        localStorage.setItem('zentea-session', JSON.stringify(_sess));
       }
-      // Load data cho chi nhánh được phân quyền
-      if(currentUser) currentUser.branch = allowedSt[0];
-      try { setTimeout(() => loadBranchData(), 50); } catch(e){}
-    } else {
-      // Staff nhiều cửa hàng: dropdown chỉ hiện các cửa hàng được phép
-      // Ẩn global và các cửa hàng không được phép
-      let firstAllowed = null;
-      [...storeSel.options].forEach(opt => {
-        // Staff không thấy option "Tất cả cửa hàng"
-        const show = allowedSt.includes(opt.value);
-        opt.style.display = show ? '' : 'none';
-        if(show && !firstAllowed) firstAllowed = opt.value;
-      });
-      // Set giá trị mặc định
-      const currentBranch = account.branch || '';
-      const targetBranch = allowedSt.includes(currentBranch) ? currentBranch : (firstAllowed || allowedSt[0]);
-      storeSel.value = targetBranch;
-      selectedBranch = targetBranch;
-      // Sync currentUser.branch và localStorage
-      if(currentUser) currentUser.branch = targetBranch;
-      try {
-        const _sess = JSON.parse(localStorage.getItem('zentea-session')||'{}');
-        if(_sess.id === account.id){ _sess.branch = targetBranch; localStorage.setItem('zentea-session', JSON.stringify(_sess)); }
-      } catch(e){}
-      // Load data cho chi nhánh đầu tiên
-      try { setTimeout(() => loadBranchData(), 50); } catch(e){}
-    }
+    } catch(e){}
+    try { setTimeout(() => loadBranchData(), 100); } catch(e){}
   }
 
   // User info
