@@ -1023,13 +1023,43 @@ async function doAuth(){
       return;
     }
 
+    // Kiểm tra status
+    const status = found.status;
+    if(status === 'pending' || !status){
+      // Chờ duyệt - hiện màn hình pending
+      showPendingScreen(found.fullname || found.username);
+      return;
+    }
+    if(status === 'rejected'){
+      // Bị từ chối → reset về pending và notify
+      found.status = 'pending';
+      found.requestedAt = new Date().toISOString();
+      await apiSaveAccounts(accounts);
+      if(fbDb){
+        try { await fbDb.ref('pendingNotify/' + found.id).set({
+          email: found.username, name: found.fullname,
+          requestedAt: Date.now(), isNew: false
+        }); } catch(e){}
+      }
+      showPendingScreen(found.fullname || found.username);
+      return;
+    }
+
+    // approved → đăng nhập
     selectedBranch = found.branch || 'global';
+    // Đảm bảo allowedStores là array
+    let _stores = found.allowedStores || null;
+    if(_stores && !Array.isArray(_stores)) _stores = Object.values(_stores);
+    if(_stores && _stores.length === 0) _stores = null;
+
     const account = {
-      user:     found.username,
-      fullname: found.fullname || found.username,
-      branch:   found.branch  || 'global',
-      role:     found.role    || 'staff',
-      id:       found.id
+      user:            found.username,
+      fullname:        found.fullname || found.username,
+      branch:          found.branch   || 'global',
+      role:            found.role     || 'staff',
+      id:              found.id,
+      allowedSections: found.allowedSections || null,
+      allowedStores:   _stores,
     };
     loginSuccess(account, false);
 
