@@ -172,10 +172,12 @@ const DEFAULT_CONTACTS = [
   {id:'c20',dept:'Chỉnh sửa file bánh, file topping',name:'Nguyễn Thị Ngọc Mai',phone:'0359688216'},
 ];
 
-let contactsData = [...DEFAULT_CONTACTS];
-
 async function loadContacts(){
   contactsData = [...DEFAULT_CONTACTS];
+  if(!fbDb || !selectedBranch || selectedBranch === 'global') {
+    renderContactsGrid();
+    return;
+  }
   try {
     const snap = await fbDb.ref('stores/' + selectedBranch + '/contacts').once('value');
     if(snap.val()) contactsData = snap.val();
@@ -183,9 +185,10 @@ async function loadContacts(){
   renderContactsGrid();
 }
 async function saveContacts(){
+  if(!fbDb || !selectedBranch || selectedBranch === 'global') return;
   try {
     await fbDb.ref('stores/' + selectedBranch + '/contacts').set(contactsData);
-  } catch(e){}
+  } catch(e){ console.error('Lỗi lưu contacts:', e); }
 }
 function renderContactsGrid(){
   const cg = $('contacts-grid');
