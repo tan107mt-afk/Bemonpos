@@ -1943,15 +1943,16 @@ function hrEvalRender(){
       return '<td contenteditable="true" style="'+td+'background:'+bg+';'+(extra||'')+'" onblur="hrEvalUpdate(\''+mv+'\','+i+',\''+field+'\',this.innerText)">'+(val||'')+'</td>';
     }
     return '<tr>'
-      +ce('name',r.name,'font-weight:700;min-width:120px;')
+      +ce('name',r.name,'font-weight:700;min-width:130px;')
       +ce('bac',r.bac,'text-align:center;min-width:45px;')
       +ce('nq',r.nq,'min-width:140px;')
       +ce('kn',r.kn,'min-width:100px;')
-      +ce('gt',r.gt,'min-width:140px;')
+      +ce('gt',r.gt,'min-width:130px;')
       +ce('tn',r.tn,'text-align:center;')
       +ce('td',r.td,'text-align:center;')
       +ce('pc',r.pc,'text-align:center;color:#2d7a2d;font-weight:700;')
-      +ce('diemtru',r.diemtru,'text-align:center;color:#dc2626;font-weight:700;')
+      +ce('diemtru',r.diemtru,'text-align:center;color:#dc2626;font-weight:700;min-width:70px;')
+      +ce('vipham',r.vipham,'color:#dc2626;font-size:11px;min-width:120px;')
       +ce('note',r.note,'color:#888;font-size:11px;')
       +'<td style="'+td+'background:'+bg+';padding:4px;text-align:center;"><button type="button" onclick="hrEvalDelete(\''+mv+'\','+i+')" style="background:#fff0f0;border:1px solid #fca5a5;color:#dc2626;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:12px;">×</button></td>'
       +'</tr>';
@@ -1971,12 +1972,80 @@ function hrEvalDelete(mv,i){
   saveModuleData('hr_eval',data);
   hrEvalRender();
 }
+// ── Nhân Sự: Tab switcher ───────────────────────────
+function nsTab(tab){
+  const listPanel = document.getElementById('ns-panel-list');
+  const kpiPanel  = document.getElementById('ns-panel-kpi');
+  const listBtn   = document.getElementById('ns-tab-list');
+  const kpiBtn    = document.getElementById('ns-tab-kpi');
+  if(!listPanel || !kpiPanel) return;
+
+  const isKpi = tab === 'kpi';
+  listPanel.style.display = isKpi ? 'none' : 'block';
+  kpiPanel.style.display  = isKpi ? 'block' : 'none';
+
+  if(listBtn){
+    listBtn.style.borderBottomColor = isKpi ? 'transparent' : 'var(--green)';
+    listBtn.style.color = isKpi ? '#9ca3af' : 'var(--green)';
+  }
+  if(kpiBtn){
+    kpiBtn.style.borderBottomColor = isKpi ? 'var(--green)' : 'transparent';
+    kpiBtn.style.color = isKpi ? 'var(--green)' : '#9ca3af';
+  }
+
+  // Load data cho tab được chọn
+  if(isKpi){
+    hrEvalInitMonths();
+    hrEvalRender();
+  } else {
+    if(typeof renderEmployees === 'function') renderEmployees();
+  }
+}
+
+// Khởi tạo tháng cho hr-eval dropdown
+function hrEvalInitMonths(){
+  const sel = document.getElementById('hr-eval-month');
+  if(!sel) return;
+  if(sel.options.length > 0) return; // Đã init rồi
+  const now = new Date();
+  for(let i = 0; i < 12; i++){
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    const label = 'Tháng ' + (d.getMonth()+1) + '/' + d.getFullYear();
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = label;
+    sel.appendChild(opt);
+  }
+}
+
+// Xuất Excel tháng hiện tại
+function hrEvalExportMonth(){
+  const mv = document.getElementById('hr-eval-month')?.value;
+  if(!mv) return;
+  const data = loadModuleData('hr_eval');
+  const rows = data[mv] || [];
+  if(!rows.length){ showToast('⚠️ Chưa có dữ liệu tháng này'); return; }
+
+  let csv = 'Họ tên,Bậc,Chấp hành NQ,Kỹ năng CM,Giao tiếp,Trách nhiệm,Thái độ,Thành phẩm hủy,Điểm trừ KPI,Lỗi vi phạm,Ghi chú\n';
+  rows.forEach(r => {
+    csv += [r.name,r.bac,r.nq,r.kn,r.gt,r.tn,r.td,r.pc,r.diemtru,r.vipham||'',r.note]
+      .map(v => '"'+(v||'')+'"').join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'KPI_NhanSu_' + mv + '.csv';
+  a.click();
+  showToast('✅ Đã xuất KPI ' + mv);
+}
+
+
 
 function hrEvalAddRow(){
   var mv=$('hr-eval-month').value;
   var data=loadModuleData('hr_eval');
   if(!data[mv]) data[mv]=[];
-  data[mv].push({name:'Nhân viên mới',bac:'C',nq:'',kn:'',gt:'',tn:'',td:'',pc:'',diemtru:'',note:''});
+  data[mv].push({name:'Nhân viên mới',bac:'C',nq:'',kn:'',gt:'',tn:'',td:'',pc:'',diemtru:'',vipham:'',note:''});
   saveModuleData('hr_eval',data);
   hrEvalRender();
   setTimeout(function(){

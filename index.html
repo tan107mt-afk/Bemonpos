@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
   <!-- App Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=1775141640">
+  <link rel="stylesheet" href="css/style.css?v=1775195168">
 
   <!-- CDN: Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1643,13 +1643,35 @@ BẢO QUẢN: Ghi tên NV cắt, bảo quản lạnh, HSD 7 ngày lúc 15h hủy
 <!-- EMPLOYEES -->
 <div class="acc-section" id="employees">
   <div class="panel-titlebar">
-    <span class="panel-emoji">👥</span>
+    <span class="panel-emoji">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:22px;height:22px;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+    </span>
     <div>
       <div class="panel-tag">Nhân sự</div>
-      <div class="panel-title">Danh Sách Nhân Viên</div>
+      <div class="panel-title">Quản Lý Nhân Sự</div>
     </div>
   </div>
+
+  <!-- Tab navigation -->
+  <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin:0 0 0 0;background:#fff;position:sticky;top:var(--topbar-h);z-index:10;">
+    <button id="ns-tab-list" onclick="nsTab('list')"
+      style="padding:12px 24px;background:none;border:none;border-bottom:3px solid var(--green);color:var(--green);font-weight:700;font-size:13px;cursor:pointer;font-family:'Open Sans',sans-serif;margin-bottom:-2px;display:flex;align-items:center;gap:6px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Danh Sách Nhân Viên
+    </button>
+    <button id="ns-tab-kpi" onclick="nsTab('kpi')"
+      style="padding:12px 24px;background:none;border:none;border-bottom:3px solid transparent;color:#9ca3af;font-weight:700;font-size:13px;cursor:pointer;font-family:'Open Sans',sans-serif;margin-bottom:-2px;display:flex;align-items:center;gap:6px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      KPI & Vi Phạm Hàng Tháng
+    </button>
+  </div>
+
   <div class="acc-body"><div class="acc-inner">
+
+    <!-- ════ TAB 1: DANH SÁCH NHÂN VIÊN ════ -->
+    <div id="ns-panel-list">
       <!-- Toolbar -->
       <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center;">
         <input id="emp-search" type="text" placeholder="🔍 Tìm nhân viên..."
@@ -1660,15 +1682,12 @@ BẢO QUẢN: Ghi tên NV cắt, bảo quản lạnh, HSD 7 ngày lúc 15h hủy
         <button onclick="openEmpModal(null)"
           style="padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:30px;
           font-family:'Open Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
-          display:flex;align-items:center;gap:6px;white-space:nowrap;"
-         >
+          display:flex;align-items:center;gap:6px;white-space:nowrap;">
           ➕ Thêm nhân viên
         </button>
       </div>
-
       <!-- Stats bar -->
       <div id="emp-stats" style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;"></div>
-
       <!-- Table -->
       <div class="table-wrapper">
         <table class="data-table" id="emp-table">
@@ -1687,45 +1706,56 @@ BẢO QUẢN: Ghi tên NV cắt, bảo quản lạnh, HSD 7 ngày lúc 15h hủy
           </thead>
           <tbody id="emp-tbody"></tbody>
         </table>
-      </div></div>
-</div>
-</div>
-
-<!-- SHIFT MANAGER MODAL -->
-<div id="shift-modal" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#fff;border-radius:20px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden;">
-    <div style="background:linear-gradient(135deg,var(--green),var(--green-light));padding:20px 24px;display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <p style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:2px;">Nhân viên</p>
-        <p style="font-family:'Lato',sans-serif;font-size:17px;color:#fff;">Quản lý Ca Làm</p>
       </div>
-      <button onclick="closeShiftModal()" style="background:rgba(255,255,255,.2);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;color:#fff;">✕</button>
     </div>
-    <div style="padding:20px 24px;">
-      <!-- Current shifts list -->
-      <p style="font-size:12px;font-weight:700;color:var(--green);letter-spacing:.5px;margin-bottom:10px;">DANH SÁCH CA LÀM</p>
-      <div id="shift-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-height:260px;overflow-y:auto;"></div>
 
-      <!-- Add new shift -->
-      <div style="border-top:1px solid var(--border);padding-top:14px;">
-        <p style="font-size:12px;font-weight:700;color:var(--green);letter-spacing:.5px;margin-bottom:8px;">➕ THÊM CA MỚI</p>
-        <div style="display:flex;gap:8px;">
-          <input id="new-shift-input" type="text" placeholder="VD: Ca split (10h–18h)"
-            style="flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:10px;
-            font-family:'Open Sans',sans-serif;font-size:13px;outline:none;box-sizing:border-box;"
-            onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter')addShift()"/>
-          <button onclick="addShift()"
-            style="padding:10px 18px;background:var(--green);color:#fff;border:none;border-radius:10px;
-            font-family:'Open Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;"
-           >Thêm</button>
+    <!-- ════ TAB 2: KPI & VI PHẠM HÀNG THÁNG ════ -->
+    <div id="ns-panel-kpi" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label style="font-size:13px;font-weight:700;color:#374151;">📅 Tháng:</label>
+          <select id="hr-eval-month" onchange="hrEvalRender()"
+            style="padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;font-family:'Open Sans',sans-serif;font-size:13px;font-weight:600;color:var(--green);background:#fff;outline:none;cursor:pointer;"></select>
         </div>
+        <button onclick="hrEvalSyncEmployees()"
+          style="padding:8px 16px;background:#059669;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;display:flex;align-items:center;gap:6px;">
+          🔄 Đồng bộ NV
+        </button>
+        <button onclick="hrEvalAddRow()"
+          style="padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;display:flex;align-items:center;gap:6px;">
+          ➕ Thêm nhân viên
+        </button>
+        <button onclick="hrEvalExportMonth()"
+          style="padding:8px 16px;background:#6366f1;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;display:flex;align-items:center;gap:6px;">
+          📊 Xuất Excel
+        </button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-bottom:12px;background:#f0fdf4;border-radius:8px;padding:8px 14px;border:1px solid #bbf7d0;">
+        💡 Click vào ô bất kỳ để nhập trực tiếp · Dùng <strong>🔄 Đồng bộ NV</strong> để tự điền tên từ danh sách nhân viên · Điểm trừ = vi phạm KPI tháng
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="hr-eval-table">
+          <thead><tr>
+            <th style="min-width:140px;">Họ tên</th>
+            <th style="min-width:50px;">Bậc</th>
+            <th style="min-width:160px;">Chấp hành NQ</th>
+            <th style="min-width:120px;">Kỹ năng CM</th>
+            <th style="min-width:140px;">Giao tiếp</th>
+            <th style="min-width:80px;">Trách nhiệm</th>
+            <th style="min-width:80px;">Thái độ</th>
+            <th style="min-width:80px;">Thành phẩm hủy</th>
+            <th style="min-width:80px;color:#dc2626;">Điểm trừ KPI</th>
+            <th style="min-width:80px;color:#dc2626;">Lỗi vi phạm</th>
+            <th style="min-width:120px;">Ghi chú</th>
+            <th style="width:36px;"></th>
+          </tr></thead>
+          <tbody id="hr-eval-tbody"></tbody>
+        </table>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- SCHEDULE -->
+  </div></div>
+</div>
 <div class="acc-section" id="schedule">
   <div class="panel-titlebar">
     <span class="panel-emoji">📅</span>
@@ -1813,50 +1843,7 @@ BẢO QUẢN: Ghi tên NV cắt, bảo quản lạnh, HSD 7 ngày lúc 15h hủy
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- HR EVAL - inline editable, tên từ danh sách nhân viên -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="acc-section" id="hr-eval">
-  <div class="panel-titlebar">
-    <span class="panel-emoji">📊</span>
-    <div>
-      <div class="panel-tag">Nhân sự</div>
-      <div class="panel-title">Dữ Liệu Đánh Giá Nhân Sự</div>
-    </div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-      <select id="hr-eval-month" onchange="hrEvalRender()" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;font-family:'Open Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green);background:#fff;outline:none;cursor:pointer;"></select>
-      <button onclick="hrEvalSyncEmployees()" style="padding:7px 14px;background:#059669;color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;">🔄 Đồng bộ NV</button>
-      <button onclick="hrEvalAddRow()" style="padding:7px 14px;background:var(--green);color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;">+ Thêm</button>
-    </div>
-  </div>
-  <div class="acc-body"><div class="acc-inner">
-    <div style="font-size:11px;color:#888;margin-bottom:12px;background:#f0fdf4;border-radius:8px;padding:8px 14px;border:1px solid #bbf7d0;">
-      💡 Click vào ô bất kỳ để nhập trực tiếp · Nhấn <strong>🔄 Đồng bộ NV</strong> để tự điền tên từ mục Nhân viên
-    </div>
-    <div class="table-wrapper">
-      <table class="data-table" id="hr-eval-table">
-        <thead><tr>
-          <th style="min-width:130px;">Họ tên</th>
-          <th style="min-width:55px;">Bậc</th>
-          <th style="min-width:160px;">Chấp hành NQ</th>
-          <th style="min-width:120px;">Kỹ năng CM</th>
-          <th style="min-width:160px;">Giao tiếp</th>
-          <th style="min-width:80px;">Trách nhiệm</th>
-          <th style="min-width:80px;">Thái độ</th>
-          <th style="min-width:70px;">Thành Phẩm Hủy</th>
-          <th style="min-width:70px;">Điểm trừ</th>
-          <th style="min-width:120px;">Ghi chú</th>
-          <th style="width:36px;"></th>
-        </tr></thead>
-        <tbody id="hr-eval-tbody"></tbody>
-      </table>
-    </div>
-  </div></div>
-</div>
 
-<!-- ══════════════════════════════════════════════════════ -->
-<!-- WASTE PRODUCT -->
-<!-- ══════════════════════════════════════════════════════ -->
-<!-- ══════════════════════════════════════════════════════ -->
-<!-- WASTE MATERIAL - giống Excel: tên NL + 12 tháng + đơn vị -->
-<!-- ══════════════════════════════════════════════════════ -->
 <div class="acc-section" id="waste-material">
   <div class="panel-titlebar">
     <span class="panel-emoji">📦</span>
@@ -2472,17 +2459,17 @@ Chưa có nội dung. Nhấn <b>✏️ Chỉnh sửa</b> để thêm quy trình 
 <!-- ═══════════════════════════════════════════════════
      App JavaScript – thứ tự quan trọng!
 ═══════════════════════════════════════════════════ -->
-<script src="js/firebase-init.js?v=1775142187"></script>
-<script src="js/config.js?v=1775142187"></script>
+<script src="js/firebase-init.js?v=1775195168"></script>
+<script src="js/config.js?v=1775195168"></script>
 <script src="js/hero-bg.js?v=1775062724" defer></script>
-<script src="js/app.js?v=1775142187"></script>
-<script src="js/data.js?v=1775142187"></script>
-<script src="js/api.js?v=1775142187"></script>
-<script src="js/auth.js?v=1775142187"></script>
-<script src="js/checklist.js?v=1775142187"></script>
-<script src="js/sections.js?v=1775142187"></script>
-<script src="js/excel.js?v=1775142187"></script>
-<script src="js/permissions.js?v=1775142187"></script>
-<script src="js/sidebar.js?v=1775142187"></script>
+<script src="js/app.js?v=1775195168"></script>
+<script src="js/data.js?v=1775195168"></script>
+<script src="js/api.js?v=1775195168"></script>
+<script src="js/auth.js?v=1775195168"></script>
+<script src="js/checklist.js?v=1775195168"></script>
+<script src="js/sections.js?v=1775195168"></script>
+<script src="js/excel.js?v=1775195168"></script>
+<script src="js/permissions.js?v=1775195168"></script>
+<script src="js/sidebar.js?v=1775195168"></script>
 
 </html>
