@@ -98,7 +98,7 @@ async function loadBranchData(){
   await loadCleaning();
   await loadCustomRecipes();
   
-  // ← THÊM DÒNG NÀY: reload checklist khi đổi cửa hàng
+  // Reload checklist khi đổi cửa hàng
   try { applyAllContentEdits(); } catch(e){}
 }
   
