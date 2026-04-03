@@ -176,24 +176,17 @@ let contactsData = [...DEFAULT_CONTACTS];
 
 async function loadContacts(){
   contactsData = [...DEFAULT_CONTACTS];
-  if(!fbDb || !selectedBranch || selectedBranch === 'global') {
-    renderContactsGrid();
-    return;
-  }
   try {
     const snap = await fbDb.ref('stores/' + selectedBranch + '/contacts').once('value');
     if(snap.val()) contactsData = snap.val();
   } catch(e){}
   renderContactsGrid();
 }
-
 async function saveContacts(){
-  if(!fbDb || !selectedBranch || selectedBranch === 'global') return;
   try {
     await fbDb.ref('stores/' + selectedBranch + '/contacts').set(contactsData);
-  } catch(e){ console.error('Lỗi lưu contacts:', e); }
+  } catch(e){}
 }
-
 function renderContactsGrid(){
   const cg = $('contacts-grid');
   if(!cg) return;
