@@ -1012,10 +1012,15 @@ function applyNavOrderOnLoad(){
 var _inlineEditActive = false;
 
 function initInlineEdit(){
-  // Add edit toggle button to each panel titlebar
+  // Các section đã có nút openContentEdit riêng → không thêm inline toggle
+  var MODAL_SECTIONS = ['checklist','salary','training','dt-vipham','dt-quytrinh'];
   document.querySelectorAll('.panel-titlebar').forEach(function(bar){
     var section = bar.closest('.acc-section');
     if(!section) return;
+    // Bỏ qua nếu section đã có btn-edit (modal editor)
+    if(bar.querySelector('.btn-edit')) return;
+    // Bỏ qua nếu section id nằm trong danh sách modal
+    if(MODAL_SECTIONS.indexOf(section.id) >= 0) return;
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'inline-edit-toggle';
