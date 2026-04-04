@@ -555,83 +555,144 @@ async function openPermEdit(id) {
   const current = acc.allowedSections || NAV_SECTIONS.map(s => s.id);
   const qlch = NAV_SECTIONS.filter(s => s.group === 'qlch');
   const dt   = NAV_SECTIONS.filter(s => s.group === 'dt');
-  const makeBoxes = (list) => list.map(s =>
-    `<label class="perm-item">
-      <input type="checkbox" class="perm-edit-cb" value="${s.id}" ${current.includes(s.id)?'checked':''}>
-      <label>${s.label}</label>
-    </label>`
-  ).join('');
-  const permBoxes = `
-    <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:1px;margin:8px 0 6px;text-transform:uppercase;">🏪 Quản Lý Cửa Hàng</div>
-    <div class="perm-grid">${makeBoxes(qlch)}</div>
-    <div style="font-size:11px;font-weight:800;color:#6366f1;letter-spacing:1px;margin:14px 0 6px;text-transform:uppercase;">🎓 Đào Tạo</div>
-    <div class="perm-grid">${makeBoxes(dt)}</div>
-  `;
-
-  // Build stores checkboxes
-  const accStores = acc.allowedStores || [];
+  const accStores = (() => {
+    let s = acc.allowedStores || [];
+    if(s && !Array.isArray(s)) s = Object.values(s);
+    return s;
+  })();
   const isAdminRole = (acc.role === 'admin' || acc.role === 'superadmin');
-  const storeBoxes = Object.entries(STORES)
-    .filter(([id]) => id !== 'global')
-    .map(([id, name]) =>
-      `<label class="perm-item">
-        <input type="checkbox" class="perm-store-cb" value="${id}" ${(isAdminRole || accStores.includes(id)) ? 'checked' : ''}>
-        <label style="font-size:11px;">${name.replace('ZEN Tea ','')}</label>
-      </label>`
-    ).join('');
-  const html = `<div style="padding:20px 22px;max-height:85vh;overflow-y:auto;">
-    <!-- Header user -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1.5px solid #e5e7eb;">
-      <div style="width:42px;height:42px;border-radius:50%;overflow:hidden;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;">
-        ${acc.avatar ? '<img src="'+acc.avatar+'" style="width:100%;height:100%;object-fit:cover;">' : '👤'}
+
+  // Build tag-style permission chips
+  const makeChips = (list, cbClass) => list.map(s => {
+    const checked = current.includes(s.id);
+    return `<label class="perm-chip ${checked?'perm-chip-on':''}" data-id="${s.id}">
+      <input type="checkbox" class="${cbClass}" value="${s.id}" ${checked?'checked':''} style="display:none">
+      <span class="perm-chip-check">
+        <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="2,6 5,9 10,3"/>
+        </svg>
+      </span>
+      <span class="perm-chip-label">${s.label}</span>
+    </label>`;
+  }).join('');
+
+  // Build store cards
+  const storeCards = Object.entries(STORES)
+    .filter(([sid]) => sid !== 'global')
+    .map(([sid, name]) => {
+      const on = isAdminRole || accStores.includes(sid);
+      const short = name.replace('ZEN Tea ','');
+      return `<label class="perm-store-card ${on?'perm-store-on':''}" data-id="${sid}">
+        <input type="checkbox" class="perm-store-cb" value="${sid}" ${on?'checked':''} style="display:none">
+        <span class="perm-store-dot"></span>
+        <span class="perm-store-name">${short}</span>
+        <span class="perm-store-check">
+          <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="2,6 5,9 10,3"/>
+          </svg>
+        </span>
+      </label>`;
+    }).join('');
+
+  const initials = (acc.fullname||acc.username||'?').split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
+  const avatarHtml = acc.avatar
+    ? `<img src="${acc.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : `<span style="font-size:17px;font-weight:800;color:#fff;">${initials}</span>`;
+
+  const roleLabel = {superadmin:'👑 Super Admin',admin:'🛡 Quản lý',staff:'👤 Nhân viên'}[acc.role] || acc.role;
+
+  const html = `
+  <div class="pe-wrap">
+    <!-- Header -->
+    <div class="pe-header">
+      <div class="pe-avatar">${avatarHtml}</div>
+      <div class="pe-user-info">
+        <div class="pe-user-name">${acc.fullname || acc.username}</div>
+        <div class="pe-user-sub">${acc.email ? acc.email : '@'+(acc.username||'?')} · <span class="pe-role-badge">${roleLabel}</span></div>
       </div>
-      <div>
-        <div style="font-size:14px;font-weight:800;color:#1a1a1a;">${acc.fullname || acc.username}</div>
-        <div style="font-size:11px;color:#9ca3af;">${acc.email}</div>
+      <button class="pe-close-btn" onclick="closePerm()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Menu quyền -->
+    <div class="pe-section">
+      <div class="pe-section-header">
+        <div class="pe-section-icon pe-icon-menu">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <span class="pe-section-title">Quyền Menu</span>
+        <div class="pe-section-actions">
+          <button class="pe-action-btn pe-action-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>{c.checked=true;c.closest('.perm-chip').classList.add('perm-chip-on')})">Chọn tất</button>
+          <button class="pe-action-btn pe-action-none" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>{c.checked=false;c.closest('.perm-chip').classList.remove('perm-chip-on')})">Bỏ tất</button>
+        </div>
       </div>
+      <div class="pe-group-label">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        Quản Lý Cửa Hàng
+      </div>
+      <div class="pe-chips">${makeChips(qlch,'perm-edit-cb')}</div>
+      <div class="pe-group-label" style="margin-top:10px;">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055"/></svg>
+        Đào Tạo
+      </div>
+      <div class="pe-chips">${makeChips(dt,'perm-edit-cb')}</div>
     </div>
 
-    <!-- Menu permissions -->
-    <div style="font-size:12px;font-weight:800;color:var(--green);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">📋 Quyền Menu</div>
-    <div style="font-size:11px;margin-bottom:8px;">
-      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>c.checked=true)">✅ Chọn tất</span>
-      &nbsp;·&nbsp;
-      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-edit-cb').forEach(c=>c.checked=false)">❌ Bỏ tất</span>
+    <!-- Store quyền -->
+    <div class="pe-section">
+      <div class="pe-section-header">
+        <div class="pe-section-icon pe-icon-store">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <span class="pe-section-title">Quyền Cửa Hàng</span>
+        <div class="pe-section-actions">
+          <button class="pe-action-btn pe-action-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>{c.checked=true;c.closest('.perm-store-card').classList.add('perm-store-on')})">Chọn tất</button>
+          <button class="pe-action-btn pe-action-none" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>{c.checked=false;c.closest('.perm-store-card').classList.remove('perm-store-on')})">Bỏ tất</button>
+        </div>
+      </div>
+      <div class="pe-stores">${storeCards}</div>
     </div>
-    <div style="font-size:11px;font-weight:700;color:#374151;margin:4px 0 3px;">🏪 Quản Lý Cửa Hàng</div>
-    <div class="perm-grid">${makeBoxes(qlch)}</div>
-    <div style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 3px;">🎓 Đào Tạo</div>
-    <div class="perm-grid">${makeBoxes(dt)}</div>
 
-    <!-- Store permissions -->
-    <div style="font-size:12px;font-weight:800;color:#6366f1;letter-spacing:.5px;text-transform:uppercase;margin:16px 0 6px;">🏪 Quyền Cửa Hàng</div>
-    <div style="font-size:11px;margin-bottom:8px;">
-      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>c.checked=true)">✅ Chọn tất</span>
-      &nbsp;·&nbsp;
-      <span class="perm-select-all" onclick="document.querySelectorAll('.perm-store-cb').forEach(c=>c.checked=false)">❌ Bỏ tất</span>
-    </div>
-    <div class="perm-store-grid">${storeBoxes}</div>
-
-    <div style="display:flex;gap:8px;margin-top:18px;">
-      <button class="btn-approve" style="flex:1;padding:10px;" onclick="savePermEdit('${id}')">💾 Lưu quyền</button>
-      <button class="btn-reject" style="padding:10px 16px;" onclick="closePerm()">✕ Hủy</button>
+    <!-- Footer -->
+    <div class="pe-footer">
+      <button class="pe-btn-save" onclick="savePermEdit('${id}')">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Lưu quyền
+      </button>
+      <button class="pe-btn-cancel" onclick="closePerm()">Hủy</button>
     </div>
   </div>`;
 
-  
-  // Show in a modal overlay
   let overlay = document.getElementById('perm-edit-overlay');
   if(!overlay){
     overlay = document.createElement('div');
     overlay.id = 'perm-edit-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:peOverlayIn .2s ease;';
     overlay.onclick = function(e){ if(e.target===this) closePerm(); };
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = `<div style="background:#fff;border-radius:20px;max-width:420px;width:90%;max-height:90vh;overflow-y:auto;">${html}</div>`;
+  overlay.innerHTML = `<div class="pe-modal">${html}</div>`;
   overlay.style.display = 'flex';
   overlay._editId = id;
+
+  // Toggle chip effect
+  overlay.querySelectorAll('.perm-chip').forEach(chip => {
+    chip.onclick = () => {
+      const cb = chip.querySelector('input');
+      cb.checked = !cb.checked;
+      chip.classList.toggle('perm-chip-on', cb.checked);
+    };
+  });
+  overlay.querySelectorAll('.perm-store-card').forEach(card => {
+    card.onclick = () => {
+      const cb = card.querySelector('input');
+      cb.checked = !cb.checked;
+      card.classList.toggle('perm-store-on', cb.checked);
+    };
+  });
 }
+
 
 function closePerm(){
   const o = document.getElementById('perm-edit-overlay');

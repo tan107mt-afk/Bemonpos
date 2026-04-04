@@ -1192,3 +1192,193 @@ button[style*="border-radius:50%"]:not(.zeye):not(.eye):not(.modal-close){
   background:#f8fafc;border-radius:16px;
   border:2px dashed #e5e7eb;
 }
+
+/* ══════════════════════════════════════════════════
+   PERM EDIT MODAL — Professional UI
+══════════════════════════════════════════════════ */
+@keyframes peOverlayIn { from{opacity:0} to{opacity:1} }
+@keyframes peModalIn { from{opacity:0;transform:translateY(16px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+.pe-modal{
+  background:#fff;border-radius:20px;
+  width:92%;max-width:480px;max-height:88vh;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 24px 64px rgba(0,0,0,.18);
+  animation:peModalIn .25s cubic-bezier(.34,1.56,.64,1) both;
+}
+.pe-wrap{
+  display:flex;flex-direction:column;
+  max-height:88vh;overflow:hidden;
+}
+
+/* Header */
+.pe-header{
+  display:flex;align-items:center;gap:12px;
+  padding:18px 20px 16px;
+  border-bottom:1.5px solid #f1f5f9;
+  flex-shrink:0;
+}
+.pe-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),#4aab3a);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;overflow:hidden;
+  box-shadow:0 2px 8px rgba(45,122,45,.3);
+}
+.pe-user-info{ flex:1;min-width:0; }
+.pe-user-name{ font-size:14px;font-weight:800;color:#0f172a;line-height:1.3; }
+.pe-user-sub{ font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap; }
+.pe-role-badge{
+  background:#f0fdf4;color:var(--green);
+  font-size:10px;font-weight:700;
+  padding:1px 7px;border-radius:20px;
+  border:1px solid #bbf7d0;
+}
+.pe-close-btn{
+  width:28px;height:28px;border-radius:8px;border:none;
+  background:#f8fafc;color:#94a3b8;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:.15s;flex-shrink:0;
+}
+.pe-close-btn:hover{ background:#fee2e2;color:#ef4444; }
+
+/* Scrollable body */
+.pe-section{
+  padding:16px 20px 4px;
+  overflow-y:auto;flex:1;
+}
+.pe-section + .pe-section{
+  border-top:1.5px solid #f1f5f9;
+  padding-top:14px;
+}
+
+/* Section header */
+.pe-section-header{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:12px;
+}
+.pe-section-icon{
+  width:24px;height:24px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.pe-icon-menu{ background:#ecfdf5;color:var(--green); }
+.pe-icon-store{ background:#eff6ff;color:#3b82f6; }
+.pe-section-title{
+  font-size:12px;font-weight:800;color:#1e293b;
+  letter-spacing:.3px;text-transform:uppercase;flex:1;
+}
+.pe-section-actions{ display:flex;gap:6px;align-items:center; }
+.pe-action-btn{
+  font-size:10px;font-weight:700;padding:3px 9px;
+  border-radius:20px;border:none;cursor:pointer;
+  font-family:'Open Sans',sans-serif;transition:.15s;
+}
+.pe-action-all{ background:#f0fdf4;color:var(--green); }
+.pe-action-all:hover{ background:var(--green);color:#fff; }
+.pe-action-none{ background:#fef2f2;color:#ef4444; }
+.pe-action-none:hover{ background:#ef4444;color:#fff; }
+
+/* Group label */
+.pe-group-label{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;color:#64748b;
+  letter-spacing:.5px;text-transform:uppercase;
+  margin-bottom:7px;
+}
+
+/* Permission chips */
+.pe-chips{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-bottom:10px;
+}
+.perm-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 10px 5px 6px;border-radius:20px;
+  border:1.5px solid #e2e8f0;background:#f8fafc;
+  cursor:pointer;transition:all .18s ease;
+  user-select:none;
+}
+.perm-chip:hover{
+  border-color:#bbf7d0;background:#f0fdf4;
+}
+.perm-chip-check{
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid #cbd5e1;background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;color:transparent;flex-shrink:0;
+}
+.perm-chip-label{
+  font-size:11px;font-weight:600;color:#64748b;
+  transition:color .18s;white-space:nowrap;
+}
+
+/* Chip ON state */
+.perm-chip-on{
+  border-color:var(--green);background:#f0fdf4;
+}
+.perm-chip-on .perm-chip-check{
+  background:var(--green);border-color:var(--green);color:#fff;
+}
+.perm-chip-on .perm-chip-label{ color:var(--green); }
+
+/* Store cards */
+.pe-stores{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:7px;margin-bottom:10px;
+}
+.perm-store-card{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:10px;
+  border:1.5px solid #e2e8f0;background:#f8fafc;
+  cursor:pointer;transition:all .18s ease;user-select:none;
+}
+.perm-store-card:hover{
+  border-color:#93c5fd;background:#eff6ff;
+}
+.perm-store-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#cbd5e1;flex-shrink:0;transition:.18s;
+}
+.perm-store-name{
+  flex:1;font-size:11px;font-weight:600;color:#64748b;
+  transition:color .18s;
+}
+.perm-store-check{
+  width:16px;height:16px;border-radius:4px;
+  border:1.5px solid #cbd5e1;background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;color:transparent;flex-shrink:0;
+}
+
+/* Store ON */
+.perm-store-on{
+  border-color:#3b82f6;background:#eff6ff;
+}
+.perm-store-on .perm-store-dot{ background:#3b82f6; }
+.perm-store-on .perm-store-name{ color:#1d4ed8; }
+.perm-store-on .perm-store-check{
+  background:#3b82f6;border-color:#3b82f6;color:#fff;
+}
+
+/* Footer */
+.pe-footer{
+  display:flex;gap:8px;
+  padding:14px 20px;border-top:1.5px solid #f1f5f9;
+  flex-shrink:0;background:#fff;
+}
+.pe-btn-save{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px;border:none;border-radius:12px;cursor:pointer;
+  background:linear-gradient(135deg,var(--green),#4aab3a);color:#fff;
+  font-size:13px;font-weight:700;font-family:'Open Sans',sans-serif;
+  transition:.15s;box-shadow:0 2px 8px rgba(45,122,45,.25);
+}
+.pe-btn-save:hover{ transform:translateY(-1px);box-shadow:0 4px 16px rgba(45,122,45,.35); }
+.pe-btn-cancel{
+  padding:11px 18px;border:1.5px solid #e2e8f0;border-radius:12px;
+  background:#fff;color:#64748b;cursor:pointer;
+  font-size:13px;font-weight:600;font-family:'Open Sans',sans-serif;
+  transition:.15s;
+}
+.pe-btn-cancel:hover{ background:#f8fafc;border-color:#cbd5e1; }
