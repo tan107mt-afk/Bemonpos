@@ -62,16 +62,29 @@
       <div id="order-layout">
         <div id="order-left">
           <div class="chip-row" id="cat-chips"></div>
-          <div class="mgrid" id="menu-grid"></div>
-        </div>
-        <!-- Desktop side panel -->
-        <div id="item-detail-panel">
-          <div class="idp-header">
-            <div class="idp-title">Chi tiết món</div>
-            <button class="idp-close" onclick="closeItemDetail()">✕</button>
+          <div id="menu-scroll">
+            <div class="mgrid" id="menu-grid"></div>
           </div>
-          <div class="idp-body" id="idp-body"></div>
-          <div class="idp-footer" id="idp-footer"></div>
+        </div>
+
+        <!-- Desktop right cart panel -->
+        <div id="pos-cart-panel">
+          <div class="pcp-header">
+            <div class="pcp-title">🛒 Giỏ hàng</div>
+            <span class="pcp-count" id="pcp-count">0 món</span>
+          </div>
+          <div class="pcp-body" id="pcp-body">
+            <div class="pcp-empty"><div style="font-size:40px">🫙</div><div style="font-weight:700;font-size:13px">Chưa có món nào</div></div>
+          </div>
+          <div class="pcp-footer">
+            <div class="pcp-total-row">
+              <span class="pcp-total-label">Tổng cộng</span>
+              <span class="pcp-total-val" id="pcp-total">0đ</span>
+            </div>
+            <div class="pcp-pm-row" id="pcp-pm-row"></div>
+            <button class="pcp-pay-btn" onclick="openPay()">💳 Thanh toán</button>
+            <button class="pcp-clear" onclick="clearCart()">Xóa tất cả</button>
+          </div>
         </div>
       </div>
     </div>
@@ -188,6 +201,6 @@
     <div class="sh-content" id="void-form-body"></div>
   </div>
 </div>
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
