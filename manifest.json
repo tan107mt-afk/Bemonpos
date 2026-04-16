@@ -1,0 +1,21 @@
+{
+  "name": "Bemon Coffee POS",
+  "short_name": "Bemon POS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F7F3EF",
+  "theme_color": "#C07A3A",
+  "description": "Hệ thống quản lý bán hàng Bemon Coffee",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
