@@ -8,27 +8,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="style.css"/>
 <style>
-/* ── Anti-aliased logo fix ── */
+/* ── Logo (PNG nền trong suốt, không cần hack) ── */
 .logo-circle {
   border-radius: 50%;
-  object-fit: cover;
-  /* Khử răng cưa tốt nhất cho ảnh jpg nền trắng */
-  -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
-  mask-image: radial-gradient(circle, white 100%, black 100%);
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: transform;
-  outline: 4px solid #fdf6ee;
-  outline-offset: -1px;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.95), 0 4px 16px rgba(111,78,55,0.18);
+  object-fit: contain;
+  background: transparent;
 }
 .logo-circle-sm {
   border-radius: 50%;
-  object-fit: cover;
-  image-rendering: -webkit-optimize-contrast;
-  outline: 2px solid #fff;
-  outline-offset: -1px;
-  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.9), 0 1px 5px rgba(111,78,55,0.15);
+  object-fit: contain;
+  background: transparent;
 }
 </style>
 </head>
@@ -37,7 +26,7 @@
 <!-- ── LOGIN ── -->
 <div id="login-wrap">
   <div style="text-align:center;margin-bottom:24px">
-    <img src="logo.jpg" class="login-logo logo-circle" style="width:120px;height:120px;display:block;margin:0 auto 12px"/>
+    <img src="logo.png" class="login-logo logo-circle" style="width:120px;height:120px;display:block;margin:0 auto 12px"/>
     <div class="login-brand">Bemon Coffee</div>
     <div class="login-sub">QUẢN LÝ BÁN HÀNG</div>
   </div>
@@ -58,7 +47,7 @@
 <div id="app">
   <div id="header">
     <div style="display:flex;align-items:center;gap:9px">
-      <img src="logo.jpg" class="logo-circle-sm" style="width:34px;height:34px;flex-shrink:0"/>
+      <img src="logo.png" class="logo-circle-sm" style="width:34px;height:34px;flex-shrink:0"/>
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--brown);line-height:1">Bemon Coffee</div>
         <div style="font-size:9px;color:var(--sub);letter-spacing:1.5px;margin-top:2px">171 TRƯƠNG ĐỊNH</div>
@@ -70,8 +59,35 @@
   <div id="content-area">
     <!-- ORDER -->
     <div class="page active fade-in" id="page-order">
-      <div class="chip-row" id="cat-chips"></div>
-      <div class="mgrid" id="menu-grid"></div>
+      <div id="order-layout">
+        <div id="order-left">
+          <div class="chip-row" id="cat-chips"></div>
+          <div class="mgrid" id="menu-grid"></div>
+        </div>
+        <!-- Desktop side panel -->
+        <div id="item-detail-panel">
+          <div class="idp-header">
+            <div class="idp-title">Chi tiết món</div>
+            <button class="idp-close" onclick="closeItemDetail()">✕</button>
+          </div>
+          <div class="idp-body" id="idp-body"></div>
+          <div class="idp-footer" id="idp-footer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile item detail overlay -->
+    <div id="item-detail-mobile">
+      <div class="ov-bg" onclick="closeItemDetail()"></div>
+      <div class="sh-body">
+        <div class="sh-handle"></div>
+        <div class="sh-hdr">
+          <div class="sh-title" id="idm-title">Chi tiết món</div>
+          <button class="sh-close" onclick="closeItemDetail()">✕</button>
+        </div>
+        <div class="sh-content" id="idm-body"></div>
+        <div id="idm-footer" style="padding:12px 18px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+12px);border-top:1px solid #f0e8dc;background:#fff;flex-shrink:0"></div>
+      </div>
     </div>
     <!-- REPORT -->
     <div class="page" id="page-report"></div>
