@@ -176,7 +176,8 @@ const sz=item=>S.sizes[item.id]||(item.pM!=null?'M':'L');
 const pr=item=>{const s=sz(item);return s==='M'?(item.pM!=null?item.pM:item.pL):item.pL};
 const cTotal=()=>S.cart.reduce((s,c)=>s+c.price*c.qty,0);
 const cCount=()=>S.cart.reduce((s,c)=>s+c.qty,0);
-const liveOrders=()=>S.orders; // Firebase lưu vĩnh viễn, không giới hạn 30 ngày
+const liveOrders=()=>S.orders; // Firebase lưu vĩnh viễn
+const activeOrders=()=>S.orders.filter(o=>!o.cancelled); // Chỉ đơn chưa huỷ
 
 // ═══════════════════════════════════════
 //  TOAST
@@ -571,7 +572,20 @@ function doCheckout(){
     id:Date.now(),
     ts:now.toISOString(),
     isoDate:now.toISOString().slice(0,10),
-    invoiceNo:'HD'+String(Date.now()).slice(-6),
+    invoiceNo:(()=>{
+      const pmCode={'cash':'TM','transfer':'CK','shopeefood':'SF','grabfood':'GB'};
+      const code=pmCode[S.pm]||'XX';
+      const d=now;
+      const dd=String(d.getDate()).padStart(2,'0');
+      const mm=String(d.getMonth()+1).padStart(2,'0');
+      const yy=String(d.getFullYear());
+      const prefix='HD'+code+dd+mm+yy;
+      // Đếm số đơn cùng ngày + cùng loại TT
+      const todayStr=now.toISOString().slice(0,10);
+      const sameDay=S.orders.filter(o=>o.isoDate===todayStr&&o.pm===S.pm&&!o.cancelled);
+      const seq=String(sameDay.length+1).padStart(2,'0');
+      return prefix+seq;
+    })(),
     date:now.toLocaleDateString('vi-VN'),
     time:now.toLocaleTimeString('vi-VN'),
     pm:S.pm,
@@ -644,9 +658,14 @@ function buildInvSheet(){
       </div>
       <div style="text-align:center;margin-bottom:18px;font-size:13px;color:var(--muted)">🙏 Cảm ơn quý khách! Hẹn gặp lại ☕</div>
     </div>`;
+  const isCancelled=o.cancelled||false;
   document.getElementById('inv-foot').innerHTML=`
     <button class="btn btn-gh" style="flex:1" onclick="closeOv('ov-inv')">Đóng</button>
-    <button class="btn btn-pr" style="flex:2" onclick="doPrint()">🖨️ In hoá đơn</button>`;
+    ${isCancelled
+      ? `<div style="flex:2;background:#fee2e2;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#dc2626">🚫 Đã huỷ</div>`
+      : `<button class="btn btn-dn" style="flex:1" onclick="cancelOrder(${o.id})">🚫 Huỷ HĐ</button>
+         <button class="btn btn-pr" style="flex:2" onclick="doPrint()">🖨️ In hoá đơn</button>`
+    }`;
 }
 function doPrint(){
   const o=S.curInv;if(!o)return;
@@ -676,6 +695,27 @@ function doPrint(){
 }
 
 // ═══════════════════════════════════════
+//  CANCEL INVOICE
+// ═══════════════════════════════════════
+function cancelOrder(id){
+  const o=S.orders.find(x=>x.id===id);
+  if(!o){toast('Không tìm thấy hoá đơn',true);return}
+  if(o.cancelled){toast('Hoá đơn đã bị huỷ rồi',true);return}
+  if(!confirm(`Xác nhận HUỶ hoá đơn ${o.invoiceNo}?\nThao tác này không thể hoàn tác.`))return;
+  S.orders=S.orders.map(x=>x.id===id?{...x,cancelled:true,cancelledAt:new Date().toISOString()}:x);
+  saveStore();
+  // Cập nhật Firebase
+  try{
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,updateDoc})=>{
+      updateDoc(doc(db,'orders',String(id)),{cancelled:true,cancelledAt:new Date().toISOString()});
+    });
+  }catch(e){}
+  closeOv('ov-inv');
+  buildInvoices();
+  toast('✓ Đã huỷ hoá đơn '+o.invoiceNo);
+}
+
+// ═══════════════════════════════════════
 //  SHARED: compute product sales from orders
 // ═══════════════════════════════════════
 function computeProductSales(orders){
@@ -701,7 +741,7 @@ function computeProductSales(orders){
 // ═══════════════════════════════════════
 function buildReport(){
   const el=document.getElementById('page-report');
-  const orders=liveOrders();
+  const orders=activeOrders();
 
   // Single-day detection
   const isSingle=(S.rMode==='range'&&S.rRange===1)||(S.rMode==='custom'&&S.rFrom===S.rTo);
@@ -1036,7 +1076,8 @@ function buildInvoices(){
         <div class="item-tags">
           ${o.items.map(it=>`<span class="itag">${CATS[it.cat]?.icon||''} ${it.n} <b>${it.size}</b>×${it.qty}</span>`).join('')}
         </div>
-        <button class="btn btn-pr btn-full" onclick="showInvById(${o.id})" style="font-size:13px;padding:10px">🧾 Xem & In hoá đơn</button>
+        ${o.cancelled?`<div style="background:#fee2e2;border-radius:10px;padding:8px;text-align:center;font-weight:800;font-size:12px;color:#dc2626;margin-bottom:8px">🚫 Hoá đơn đã bị huỷ</div>`:''}
+        <button class="btn ${o.cancelled?'btn-gh':'btn-pr'} btn-full" onclick="showInvById(${o.id})" style="font-size:13px;padding:10px">🧾 Xem hoá đơn</button>
       </div>`;
     }).join('')}`;
 }
@@ -1303,7 +1344,7 @@ Object.assign(window,{
   addCart, chgQty, clearCart, buildPosCart,
   openCart, openPay, setPM, doCheckout,
   // Invoice
-  showInvById, doPrint,
+  showInvById, doPrint, cancelOrder,
   // Report
   setRM, setRR,
   // Inventory tabs
