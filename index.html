@@ -7,21 +7,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="style.css"/>
+<style>
+/* ── Anti-aliased logo fix ── */
+.logo-circle {
+  border-radius: 50%;
+  object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* Lớp ring trắng che răng cưa */
+  outline: 3px solid #fff;
+  outline-offset: -1px;
+  /* Shadow mềm tạo cảm giác mượt */
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 2px 8px rgba(111,78,55,0.18);
+}
+.logo-circle-sm {
+  border-radius: 50%;
+  object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+  outline: 2px solid #fff;
+  outline-offset: -1px;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.9), 0 1px 5px rgba(111,78,55,0.15);
+}
+</style>
 </head>
 <body>
-
+ 
 <!-- ── LOGIN ── -->
 <div id="login-wrap">
   <div style="text-align:center;margin-bottom:24px">
-    <img src="logo.jpg" class="login-logo" style="border-radius:50%;object-fit:cover"/>
+    <img src="logo.jpg" class="login-logo logo-circle" style="width:80px;height:80px;display:block;margin:0 auto 12px"/>
     <div class="login-brand">Bemon Coffee</div>
     <div class="login-sub">QUẢN LÝ BÁN HÀNG</div>
   </div>
   <div class="login-card">
     <div style="font-weight:900;font-size:18px;text-align:center;margin-bottom:20px;color:var(--text)">Đăng nhập</div>
-    <div class="fg"><label class="fl">Tên đăng nhập</label><input class="fi" id="lu" type="text" placeholder="bemoncoffee0509" autocomplete="username" autocapitalize="none" autocorrect="off"/></div>
+    <div class="fg"><label class="fl">Tên đăng nhập</label><input class="fi" id="lu" type="text" autocomplete="username" autocapitalize="none" autocorrect="off"/></div>
     <div class="fg"><label class="fl">Mật khẩu</label>
-      <div class="pass-wrap"><input class="fi fi-pass" id="lp" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      <div class="pass-wrap"><input class="fi fi-pass" id="lp" type="password" autocomplete="current-password"/>
       <button class="pass-eye" onclick="togglePW()" id="peye">👁️</button></div>
     </div>
     <div class="login-err" id="lerr"></div>
@@ -29,12 +51,12 @@
   </div>
   <div style="text-align:center;margin-top:18px;font-size:11px;color:#c8bfb0">Bemon Coffee POS · 171 Trương Định</div>
 </div>
-
+ 
 <!-- ── APP ── -->
 <div id="app">
   <div id="header">
     <div style="display:flex;align-items:center;gap:9px">
-      <img src="logo.jpg" style="width:34px;height:34px;flex-shrink:0;border-radius:50%;object-fit:cover"/>
+      <img src="logo.jpg" class="logo-circle-sm" style="width:34px;height:34px;flex-shrink:0"/>
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--brown);line-height:1">Bemon Coffee</div>
         <div style="font-size:9px;color:var(--sub);letter-spacing:1.5px;margin-top:2px">171 TRƯƠNG ĐỊNH</div>
@@ -42,7 +64,7 @@
     </div>
     <div id="hdr-actions" style="display:flex;gap:7px;align-items:center"></div>
   </div>
-
+ 
   <div id="content-area">
     <!-- ORDER -->
     <div class="page active fade-in" id="page-order">
@@ -55,7 +77,7 @@
     <div class="page" id="page-invoices"></div>
     <!-- PRODUCTS -->
     <div class="page" id="page-products"></div>
-
+ 
     <!-- INVENTORY -->
     <div class="page" id="page-inventory">
       <div class="inv-sub-bar" id="inv-sub-bar">
@@ -72,7 +94,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div id="bottom-nav">
     <button class="nb on" onclick="goTab('order')"><span class="ni">🛒</span><span class="nl">Bán hàng</span><div class="nd"></div></button>
     <button class="nb" onclick="goTab('report')"><span class="ni">📊</span><span class="nl">Báo cáo</span><div class="nd"></div></button>
@@ -81,9 +103,9 @@
     <button class="nb" onclick="goTab('inventory')"><span class="ni">📦</span><span class="nl">Kho</span><div class="nd"></div></button>
   </div>
 </div>
-
+ 
 <div id="toast"></div>
-
+ 
 <!-- ── SHEETS ── -->
 <div class="overlay" id="ov-cart">
   <div class="ov-bg" onclick="closeOv('ov-cart')"></div>
@@ -93,7 +115,7 @@
     <div class="sh-content" id="cart-body"></div>
   </div>
 </div>
-
+ 
 <div class="overlay" id="ov-pay">
   <div class="ov-bg" onclick="closeOv('ov-pay')"></div>
   <div class="sh-body" style="max-height:78vh">
@@ -102,7 +124,7 @@
     <div class="sh-content" id="pay-body"></div>
   </div>
 </div>
-
+ 
 <div class="overlay" id="ov-inv">
   <div class="ov-bg" onclick="closeOv('ov-inv')"></div>
   <div class="sh-body" style="max-height:93dvh;overflow:hidden;display:flex;flex-direction:column">
@@ -111,7 +133,7 @@
     <div id="inv-foot" style="display:flex;gap:10px;padding:12px 20px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+12px);border-top:1px solid #f0e8dc;background:#fff;flex-shrink:0"></div>
   </div>
 </div>
-
+ 
 <!-- form modals -->
 <div class="overlay fm" id="ov-item-form">
   <div class="ov-bg" onclick="closeOv('ov-item-form')"></div>
@@ -121,7 +143,7 @@
     <div class="sh-content" id="item-form-body"></div>
   </div>
 </div>
-
+ 
 <div class="overlay fm" id="ov-ing-form">
   <div class="ov-bg" onclick="closeOv('ov-ing-form')"></div>
   <div class="sh-body">
@@ -130,7 +152,7 @@
     <div class="sh-content" id="ing-form-body"></div>
   </div>
 </div>
-
+ 
 <div class="overlay fm" id="ov-purch-form">
   <div class="ov-bg" onclick="closeOv('ov-purch-form')"></div>
   <div class="sh-body">
@@ -139,7 +161,7 @@
     <div class="sh-content" id="purch-form-body"></div>
   </div>
 </div>
-
+ 
 <div class="overlay fm" id="ov-void-form">
   <div class="ov-bg" onclick="closeOv('ov-void-form')"></div>
   <div class="sh-body">
@@ -151,3 +173,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+ 
