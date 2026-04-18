@@ -22,16 +22,22 @@ input[type=date]{font-size:14px!important}
 /* ── Layout ── */
 #login-wrap{position:fixed;inset:0;z-index:1000;background:linear-gradient(160deg,#fdf6ee,#f0e8dc);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 #app{height:100dvh;display:flex;flex-direction:column;display:none}
-#header{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;padding-top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 6px rgba(120,80,20,.06);z-index:50;position:relative}
+#header{background:linear-gradient(180deg,#ffffff,#fbf7f2);border-bottom:1px solid var(--border);padding:14px 16px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);display:grid;grid-template-columns:60px 1fr auto;align-items:center;flex-shrink:0;box-shadow:0 3px 14px rgba(120,80,20,.08);z-index:50;position:relative;gap:12px}
+.hdr-center{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hdr-brand-row{display:flex;align-items:center;gap:10px}
+.hdr-logo-svg{width:44px;height:44px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(61,31,10,.15))}
+.hdr-brand-text{font-family:'Playfair Display',serif;font-size:22px;color:var(--brown);line-height:1;letter-spacing:.5px;font-weight:700}
+.hdr-sub-addr{font-size:9.5px;color:var(--sub);letter-spacing:2px;margin-top:4px;font-weight:700;text-transform:uppercase}
 #content-area{flex:1;overflow:hidden;position:relative}
 .page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 14px 90px;opacity:0;pointer-events:none;transition:opacity .15s}
 .page.active{opacity:1;pointer-events:auto}
-#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:100;box-shadow:0 -2px 10px rgba(120,80,20,.07)}
-.nb{flex:1;padding:9px 0 7px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
-.nb .ni{font-size:20px}
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:100;box-shadow:0 -2px 16px rgba(120,80,20,.08)}
+.nb{flex:1;padding:10px 0 8px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--sub);transition:color .15s}
+.nb .ni{display:flex;align-items:center;justify-content:center;width:24px;height:24px}
 .nb .nl{font-size:10px;font-weight:700;color:var(--sub)}
-.nb.on .nl{color:var(--accent)}
-.nb .nd{width:20px;height:2.5px;background:var(--accent);border-radius:2px;display:none}
+.nb.on{color:var(--accent)}
+.nb.on .nl{color:var(--accent);font-weight:800}
+.nb .nd{width:24px;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;display:none;margin-top:1px}
 .nb.on .nd{display:block}
 
 /* ── Toast ── */
@@ -56,10 +62,10 @@ input[type=date]{font-size:14px!important}
 .fm .sh-body{max-height:93vh}
 
 /* ── Login ── */
-.login-card{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:380px;box-shadow:0 8px 36px rgba(120,80,20,.12)}
-.login-logo{width:70px;height:70px;display:block;margin:0 auto 12px}
-.login-brand{font-family:'Playfair Display',serif;font-size:26px;color:var(--brown);font-weight:700;text-align:center}
-.login-sub{font-size:11px;color:var(--sub);text-align:center;letter-spacing:1.5px;margin-top:4px;margin-bottom:28px}
+.login-card{background:#fff;border-radius:22px;padding:30px 28px;width:100%;max-width:380px;box-shadow:0 12px 44px rgba(120,80,20,.15)}
+.login-logo{width:88px;height:88px;display:block;margin:0 auto 14px;filter:drop-shadow(0 4px 12px rgba(61,31,10,.2))}
+.login-brand{font-family:'Playfair Display',serif;font-size:32px;color:var(--brown);font-weight:700;text-align:center;letter-spacing:.5px}
+.login-sub{font-size:11px;color:var(--sub);text-align:center;letter-spacing:2.5px;margin-top:6px;margin-bottom:32px;font-weight:700}
 .login-err{background:#fee2e2;color:#dc2626;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;margin-bottom:14px;display:none;text-align:center}
 .pass-wrap{position:relative}
 .pass-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;color:var(--muted)}
@@ -87,12 +93,14 @@ input[type=date]{font-size:14px!important}
 .btn-sm-del{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:700}
 
 /* ── Header action button ── */
-.hbtn{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:800;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
-.hbtn-ac{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;box-shadow:0 3px 8px rgba(200,135,58,.25)}
-.hbtn-gn{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none}
-.hbtn-rd{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5}
+.hbtn{background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;transition:all .15s;height:36px}
+.hbtn:hover{border-color:var(--accent);color:var(--accent)}
+.hbtn-ac{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff!important;border:none;box-shadow:0 3px 10px rgba(200,135,58,.3)}
+.hbtn-ac:hover{filter:brightness(1.05)}
+.hbtn-gn{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff!important;border:none;box-shadow:0 3px 10px rgba(22,163,74,.25)}
+.hbtn-rd{background:#fee2e2;color:#dc2626!important;border:1px solid #fca5a5}
 #cart-fab{position:relative}
-#cart-badge{position:absolute;top:-6px;right:-6px;background:#e53e3e;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center}
+#cart-badge{position:absolute;top:-6px;right:-6px;background:#e53e3e;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:900;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(229,62,62,.4);border:2px solid #fff}
 
 /* ── Cards ── */
 .card{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(120,80,20,.04);margin-bottom:12px}
@@ -106,24 +114,36 @@ input[type=date]{font-size:14px!important}
 .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
 
 /* ── Chips ── */
-.chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
-.chip{flex-shrink:0;background:#fff;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:7px 14px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .13s}
-.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;-webkit-overflow-scrolling:touch}
+.chip{flex-shrink:0;background:#fff;color:var(--muted);border:1.5px solid var(--border);border-radius:22px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s;box-shadow:0 1px 3px rgba(120,80,20,.05)}
+.chip:hover{border-color:var(--accent);transform:translateY(-1px)}
+.chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:var(--accent);box-shadow:0 4px 12px rgba(200,135,58,.3)}
+.chip-ic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}
+.chip-ic svg{width:100%;height:100%}
 
 /* ── Menu grid ── */
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:10px}
-.mi{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;transition:transform .12s,box-shadow .12s}
-.mi:active{transform:scale(.97);box-shadow:0 4px 12px rgba(120,80,20,.1)}
-.mi-icon{font-size:26px;text-align:center;margin-bottom:5px}
-.mi-name{font-weight:800;font-size:12px;line-height:1.35;color:var(--text);margin-bottom:1px}
-.mi-cat{font-size:10px;color:var(--sub);margin-bottom:8px}
-.sz-row{display:flex;gap:3px;margin-bottom:8px}
-.sz-btn{flex:1;border:1px solid var(--border);border-radius:7px;font-size:10px;font-weight:700;padding:4px 0;cursor:pointer;background:#f5f0eb;color:var(--muted);line-height:1.3;transition:all .1s}
-.sz-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-.mi-foot{display:flex;justify-content:space-between;align-items:center}
-.mi-price{color:var(--accent);font-weight:900;font-size:13px}
-.add-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:17px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:filter .12s}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+.mi{background:#fff;border:1.5px solid var(--border);border-radius:18px;cursor:pointer;transition:all .18s;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(120,80,20,.05)}
+.mi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(120,80,20,.12);border-color:var(--accent)}
+.mi:active{transform:scale(.98)}
+.mi-icon-wrap{width:100%;height:80px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);position:relative}
+.mi-icon-wrap svg{filter:drop-shadow(0 2px 6px rgba(61,31,10,.15))}
+.mi-body{padding:11px 12px 12px;display:flex;flex-direction:column}
+.mi-name{font-weight:800;font-size:13px;line-height:1.3;color:var(--text);margin-bottom:5px;min-height:34px}
+.mi-cat-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;align-self:flex-start;margin-bottom:9px;letter-spacing:.3px}
+.sz-row{display:flex;gap:4px;margin-bottom:9px}
+.sz-btn{flex:1;border:1.2px solid var(--border);border-radius:8px;cursor:pointer;background:#faf7f3;color:var(--muted);display:flex;flex-direction:column;align-items:center;padding:4px 0;transition:all .14s;gap:0}
+.sz-btn .sz-lb{font-size:10px;font-weight:800;line-height:1}
+.sz-btn .sz-pr{font-size:9px;font-weight:600;line-height:1.2;margin-top:2px}
+.sz-btn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:var(--accent);box-shadow:0 2px 6px rgba(200,135,58,.3)}
+.mi-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.mi-price{color:var(--accent);font-weight:900;font-size:14px}
+.add-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;box-shadow:0 2px 8px rgba(200,135,58,.35)}
+.add-btn:hover{transform:scale(1.08)}
 .add-btn:active{filter:brightness(.88)}
+
+/* ── Cart icon in list ── */
+.ci-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
 /* ── Cart / Pay ── */
 .ci{background:#faf7f3;border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid #ede5d8}
@@ -273,26 +293,32 @@ input[type=date]{font-size:14px!important}
 <!-- ── APP ── -->
 <div id="app">
   <div id="header">
-    <div style="display:flex;align-items:center;gap:9px">
-      <svg style="width:34px;height:34px;flex-shrink:0" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g transform="rotate(15,100,110)">
-      <rect x="117" y="18" width="11" height="52" rx="4" fill="#3d1f0a" transform="rotate(12,122,44)"/>
-      <rect x="32" y="52" width="118" height="20" rx="8" fill="#3d1f0a"/>
-      <rect x="24" y="58" width="28" height="14" rx="5" fill="#3d1f0a"/>
-      <path d="M44 72 L148 72 L140 108 L52 108 Z" fill="#3d1f0a"/>
-      <rect x="30" y="118" width="24" height="88" rx="4" fill="#3d1f0a"/>
-      <rect x="146" y="118" width="24" height="88" rx="4" fill="#3d1f0a"/>
-      <polygon points="30,118 54,118 105,168 81,168" fill="#3d1f0a"/>
-      <polygon points="146,118 170,118 119,168 95,168" fill="#3d1f0a"/>
-      <polygon points="81,168 119,168 119,206 81,206" fill="#3d1f0a"/>
-    </g>
-  </svg>
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--brown);line-height:1">Bemon Coffee</div>
-        <div style="font-size:9px;color:var(--sub);letter-spacing:1.5px;margin-top:2px">171 TRƯƠNG ĐỊNH</div>
+    <!-- Left spacer (reserved for potential back button in future) -->
+    <div></div>
+    <!-- Center: logo + brand name -->
+    <div class="hdr-center">
+      <div class="hdr-brand-row">
+        <svg class="hdr-logo-svg" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g transform="rotate(15,100,110)">
+            <rect x="117" y="18" width="11" height="52" rx="4" fill="#3d1f0a" transform="rotate(12,122,44)"/>
+            <rect x="32" y="52" width="118" height="20" rx="8" fill="#3d1f0a"/>
+            <rect x="24" y="58" width="28" height="14" rx="5" fill="#3d1f0a"/>
+            <path d="M44 72 L148 72 L140 108 L52 108 Z" fill="#3d1f0a"/>
+            <rect x="30" y="118" width="24" height="88" rx="4" fill="#3d1f0a"/>
+            <rect x="146" y="118" width="24" height="88" rx="4" fill="#3d1f0a"/>
+            <polygon points="30,118 54,118 105,168 81,168" fill="#3d1f0a"/>
+            <polygon points="146,118 170,118 119,168 95,168" fill="#3d1f0a"/>
+            <polygon points="81,168 119,168 119,206 81,206" fill="#3d1f0a"/>
+          </g>
+        </svg>
+        <div style="text-align:left">
+          <div class="hdr-brand-text">Bemon Coffee</div>
+          <div class="hdr-sub-addr">171 Trương Định</div>
+        </div>
       </div>
     </div>
-    <div id="hdr-actions" style="display:flex;gap:7px;align-items:center"></div>
+    <!-- Right: action buttons -->
+    <div id="hdr-actions" style="display:flex;gap:7px;align-items:center;justify-content:flex-end"></div>
   </div>
 
   <div id="content-area">
@@ -326,11 +352,26 @@ input[type=date]{font-size:14px!important}
   </div>
 
   <div id="bottom-nav">
-    <button class="nb on" onclick="goTab('order')"><span class="ni">🛒</span><span class="nl">Bán hàng</span><div class="nd"></div></button>
-    <button class="nb" onclick="goTab('report')"><span class="ni">📊</span><span class="nl">Báo cáo</span><div class="nd"></div></button>
-    <button class="nb" onclick="goTab('products')"><span class="ni">🏆</span><span class="nl">Sản phẩm</span><div class="nd"></div></button>
-    <button class="nb" onclick="goTab('invoices')"><span class="ni">🧾</span><span class="nl">Hoá đơn</span><div class="nd"></div></button>
-    <button class="nb" onclick="goTab('inventory')"><span class="ni">📦</span><span class="nl">Kho</span><div class="nd"></div></button>
+    <button class="nb on" onclick="goTab('order')">
+      <span class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+      <span class="nl">Bán hàng</span><div class="nd"></div>
+    </button>
+    <button class="nb" onclick="goTab('report')">
+      <span class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16V9"/><path d="M12 16V5"/><path d="M17 16v-4"/></svg></span>
+      <span class="nl">Báo cáo</span><div class="nd"></div>
+    </button>
+    <button class="nb" onclick="goTab('products')">
+      <span class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span>
+      <span class="nl">Sản phẩm</span><div class="nd"></div>
+    </button>
+    <button class="nb" onclick="goTab('invoices')">
+      <span class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span>
+      <span class="nl">Hoá đơn</span><div class="nd"></div>
+    </button>
+    <button class="nb" onclick="goTab('inventory')">
+      <span class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg></span>
+      <span class="nl">Kho</span><div class="nd"></div>
+    </button>
   </div>
 </div>
 
@@ -406,8 +447,61 @@ input[type=date]{font-size:14px!important}
 //  CONSTANTS
 // ═══════════════════════════════════════
 const CRED={u:'bemoncoffee0509',p:'Bemon0509.'};
-const CATS={'Robusta':{icon:'☕',color:'#6F4E37'},'Arabica':{icon:'🫘',color:'#3E2723'},'Trà':{icon:'🍵',color:'#2E7D32'},'Khác':{icon:'🍫',color:'#AD1457'},'Topping':{icon:'✨',color:'#F57F17'}};
+const CATS={
+  'Robusta':{icon:'☕',color:'#6F4E37',grad:'linear-gradient(135deg,#8B6F47,#5d3a1a)'},
+  'Arabica':{icon:'☕',color:'#3E2723',grad:'linear-gradient(135deg,#6d4c41,#3e2723)'},
+  'Trà':    {icon:'🍵',color:'#2E7D32',grad:'linear-gradient(135deg,#66bb6a,#2e7d32)'},
+  'Khác':   {icon:'🍫',color:'#AD1457',grad:'linear-gradient(135deg,#ec407a,#ad1457)'},
+  'Topping':{icon:'✨',color:'#F57F17',grad:'linear-gradient(135deg,#ffb74d,#f57f17)'}
+};
 const PMS=[{id:'cash',lb:'Tiền mặt',ic:'💵',c:'#16a34a'},{id:'transfer',lb:'Chuyển khoản',ic:'🏦',c:'#3b82f6'},{id:'shopeefood',lb:'ShopeeFood',ic:'🛵',c:'#f97316'},{id:'grabfood',lb:'GrabFood',ic:'🟢',c:'#16a34a'}];
+
+// ═══════════════════════════════════════
+//  SVG ICONS — đẹp & chuyên nghiệp
+// ═══════════════════════════════════════
+function svgIcon(cat,size=42){
+  const c=CATS[cat]?.color||'#6F4E37';
+  // Coffee takeaway cup (for Robusta, Arabica)
+  const cupIcon=`<svg viewBox="0 0 64 64" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g-${cat}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${c}" stop-opacity=".9"/><stop offset="100%" stop-color="${c}"/></linearGradient></defs>
+    <path d="M18 22 L22 52 Q22 56 26 56 L38 56 Q42 56 42 52 L46 22 Z" fill="url(#g-${cat})"/>
+    <rect x="14" y="16" width="36" height="8" rx="3" fill="${c}" opacity=".95"/>
+    <ellipse cx="40" cy="20" rx="3" ry="1.5" fill="#fff" opacity=".35"/>
+    <rect x="37" y="6" width="4" height="14" rx="1.5" fill="${c}" opacity=".9" transform="rotate(12,39,13)"/>
+    <path d="M24 34 Q28 30 32 34 T40 34" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".35" fill="none"/>
+  </svg>`;
+  // Tea cup with steam (for Trà)
+  const teaIcon=`<svg viewBox="0 0 64 64" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g-${cat}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${c}" stop-opacity=".85"/><stop offset="100%" stop-color="${c}"/></linearGradient></defs>
+    <path d="M16 28 L18 50 Q18 56 24 56 L38 56 Q44 56 44 50 L46 28 Z" fill="url(#g-${cat})"/>
+    <path d="M46 32 Q54 32 54 40 Q54 48 46 48" stroke="${c}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <ellipse cx="31" cy="30" rx="14" ry="3" fill="${c}" opacity=".4"/>
+    <path d="M24 10 Q26 14 24 18 M32 8 Q34 12 32 16 M40 10 Q42 14 40 18" stroke="${c}" stroke-width="2" stroke-linecap="round" fill="none" opacity=".6"/>
+  </svg>`;
+  // Milkshake (for Khác - Socola, Matcha)
+  const shakeIcon=`<svg viewBox="0 0 64 64" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g-${cat}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${c}" stop-opacity=".85"/><stop offset="100%" stop-color="${c}"/></linearGradient></defs>
+    <path d="M18 24 L22 56 Q22 58 24 58 L40 58 Q42 58 42 56 L46 24 Z" fill="url(#g-${cat})"/>
+    <ellipse cx="32" cy="24" rx="14" ry="4" fill="${c}" opacity=".95"/>
+    <ellipse cx="28" cy="22" rx="3" ry="1.5" fill="#fff" opacity=".4"/>
+    <ellipse cx="36" cy="21" rx="4" ry="1.8" fill="#fff" opacity=".35"/>
+    <rect x="31" y="4" width="3" height="22" rx="1.2" fill="${c}" transform="rotate(-14,32,15)"/>
+    <circle cx="28" cy="30" r="1.5" fill="#fff" opacity=".5"/>
+    <circle cx="38" cy="34" r="1" fill="#fff" opacity=".4"/>
+  </svg>`;
+  // Topping sparkle (for Topping)
+  const toppingIcon=`<svg viewBox="0 0 64 64" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g-${cat}" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#ffc857"/><stop offset="100%" stop-color="${c}"/></linearGradient></defs>
+    <path d="M32 8 L36 26 L54 30 L36 34 L32 52 L28 34 L10 30 L28 26 Z" fill="url(#g-${cat})"/>
+    <circle cx="48" cy="18" r="3" fill="${c}" opacity=".7"/>
+    <circle cx="16" cy="46" r="2.5" fill="${c}" opacity=".6"/>
+    <circle cx="50" cy="48" r="2" fill="${c}" opacity=".5"/>
+  </svg>`;
+  if(cat==='Topping') return toppingIcon;
+  if(cat==='Trà') return teaIcon;
+  if(cat==='Khác') return shakeIcon;
+  return cupIcon;
+}
 
 // ═══════════════════════════════════════
 //  STATE
@@ -673,7 +767,8 @@ function buildHeader(){
     const b=document.createElement('button');
     b.id='cart-fab';b.className='hbtn'+(cnt>0?' hbtn-ac':'');
     b.onclick=openCart;b.style.position='relative';
-    b.innerHTML=cnt>0?`<span>🛒</span><span>${fmt(tot)}</span><span id="cart-badge" style="display:flex">${cnt}</span>`:`<span>🛒</span>`;
+    const cartSvg=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`;
+    b.innerHTML=cnt>0?`${cartSvg}<span>${fmt(tot)}</span><span id="cart-badge" style="display:flex">${cnt}</span>`:cartSvg;
     el.appendChild(b);
   }
   if(S.tab==='invoices'){
@@ -686,7 +781,10 @@ function buildHeader(){
     if(S.invTab==='purchase') el.appendChild(mkBtn('+ Nhập','hbtn hbtn-ac',openPurchForm));
     if(S.invTab==='void') el.appendChild(mkBtn('+ Huỷ','hbtn hbtn-rd',openVoidForm));
   }
-  el.appendChild(mkBtn('🔒','hbtn',doLogout));
+  const logoutSvg=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`;
+  const logoutBtn=document.createElement('button');
+  logoutBtn.className='hbtn';logoutBtn.innerHTML=logoutSvg;logoutBtn.onclick=doLogout;logoutBtn.title='Đăng xuất';
+  el.appendChild(logoutBtn);
 }
 function mkBtn(txt,cls,fn){const b=document.createElement('button');b.className=cls;b.textContent=txt;if(fn)b.onclick=fn;return b}
 
@@ -696,7 +794,10 @@ function mkBtn(txt,cls,fn){const b=document.createElement('button');b.className=
 function buildCatChips(){
   const el=document.getElementById('cat-chips');
   const cats=['Tất cả',...Object.keys(CATS)];
-  el.innerHTML=cats.map(c=>`<button class="chip${S.selCat===c?' on':''}" onclick="selCat('${c}')">${CATS[c]?.icon||''} ${c}</button>`).join('');
+  el.innerHTML=cats.map(c=>{
+    const ic=c==='Tất cả'?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`:svgIcon(c,16);
+    return`<button class="chip${S.selCat===c?' on':''}" onclick="selCat('${c}')"><span class="chip-ic">${ic}</span>${c}</button>`;
+  }).join('');
 }
 function selCat(c){S.selCat=c;buildCatChips();buildMenuGrid()}
 
@@ -705,17 +806,24 @@ function buildMenuGrid(){
   const list=S.selCat==='Tất cả'?S.items:S.items.filter(m=>m.cat===S.selCat);
   el.innerHTML=list.map(item=>{
     const s=sz(item),hM=item.pM!=null,hL=item.pL!=null,p=pr(item);
+    const cat=CATS[item.cat]||{color:'#6F4E37'};
     return`<div class="mi" onclick="addCart(${item.id})">
-      <div class="mi-icon">${CATS[item.cat]?.icon||'☕'}</div>
-      <div class="mi-name">${item.n}</div>
-      <div class="mi-cat">${item.cat}</div>
-      <div class="sz-row">
-        ${hM?`<button class="sz-btn${s==='M'?' on':''}" onclick="setSz(event,${item.id},'M')">M<br><span style="font-size:9px;font-weight:600">${fK(item.pM)}</span></button>`:''}
-        ${hL?`<button class="sz-btn${s==='L'?' on':''}" onclick="setSz(event,${item.id},'L')">L<br><span style="font-size:9px;font-weight:600">${fK(item.pL)}</span></button>`:''}
+      <div class="mi-icon-wrap" style="background:${cat.color}0d">
+        ${svgIcon(item.cat,42)}
       </div>
-      <div class="mi-foot">
-        <span class="mi-price">${fmt(p)}</span>
-        <button class="add-btn" onclick="addCart(${item.id});event.stopPropagation()">+</button>
+      <div class="mi-body">
+        <div class="mi-name">${item.n}</div>
+        <div class="mi-cat-tag" style="color:${cat.color};background:${cat.color}15">${item.cat}</div>
+        <div class="sz-row">
+          ${hM?`<button class="sz-btn${s==='M'?' on':''}" onclick="setSz(event,${item.id},'M')"><span class="sz-lb">M</span><span class="sz-pr">${fK(item.pM)}</span></button>`:''}
+          ${hL?`<button class="sz-btn${s==='L'?' on':''}" onclick="setSz(event,${item.id},'L')"><span class="sz-lb">L</span><span class="sz-pr">${fK(item.pL)}</span></button>`:''}
+        </div>
+        <div class="mi-foot">
+          <span class="mi-price">${fmt(p)}</span>
+          <button class="add-btn" onclick="addCart(${item.id});event.stopPropagation()" aria-label="Thêm vào giỏ">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -742,15 +850,17 @@ function clearCart(){S.cart=[];save();buildCartBody();buildHeader()}
 function openCart(){buildCartBody();openOv('ov-cart')}
 function buildCartBody(){
   const cnt=cCount(),tot=cTotal();
-  document.getElementById('cart-title').textContent=`🛒 Giỏ hàng${cnt>0?' ('+cnt+')':''}`;
+  document.getElementById('cart-title').innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Giỏ hàng${cnt>0?' · '+cnt:''}</span>`;
   const el=document.getElementById('cart-body');
   if(!S.cart.length){el.innerHTML=`<div class="empty"><div class="empty-ic">🫙</div><div class="empty-tx">Chưa có món nào</div></div>`;return}
-  el.innerHTML=S.cart.map(c=>`
+  el.innerHTML=S.cart.map(c=>{
+    const catInfo=CATS[c.cat]||{color:'#6F4E37'};
+    return`
     <div class="ci">
-      <span style="font-size:18px;flex-shrink:0">${CATS[c.cat]?.icon||'☕'}</span>
+      <div class="ci-icon" style="background:${catInfo.color}15">${svgIcon(c.cat,24)}</div>
       <div style="flex:1;min-width:0">
         <div class="ci-name">${c.n}</div>
-        <div style="display:flex;gap:5px;align-items:center;margin-top:2px">
+        <div style="display:flex;gap:5px;align-items:center;margin-top:3px">
           <span class="sz-badge">${c.size}</span>
           <span class="ci-price">${fmt(c.price)}</span>
         </div>
@@ -760,7 +870,7 @@ function buildCartBody(){
         <span style="font-weight:900;width:20px;text-align:center;font-size:14px">${c.qty}</span>
         <button class="qbtn" onclick="chgQty('${c.key}',1)">+</button>
       </div>
-    </div>`).join('')+`
+    </div>`;}).join('')+`
   <div style="margin-top:16px;padding-top:16px;border-top:1.5px dashed var(--border)">
     <div style="display:flex;justify-content:space-between;margin-bottom:16px">
       <span style="font-weight:800;font-size:15px">Tổng cộng</span>
